@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Atelier — Design. Sound. Lens.</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sora:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --white: #FFFFFF;
+  --snow: #FAFAFA;
+  --pearl: #F6F4F0;
+  --beige: #EDE8E0;
+  --beige-warm: #E5DDD2;
+  --beige-deep: #D4C9BA;
+  --sand: #C8BBAA;
+  --taupe: #B0A494;
+  --blush: #D4A0A0;
+  --blush-soft: #E8C5C5;
+  --blush-pale: #F5E8E8;
+  --rose-accent: #C47D7D;
+  --rose-muted: #B08888;
+  --ink: #1A1714;
+  --ink-soft: #2E2A25;
+  --text: #3D3630;
+  --text-mid: #6B6159;
+  --text-light: #9A8F84;
+  --text-faint: #BDB2A6;
+  --design: #C47D7D;
+  --design-pale: #F5E8E8;
+  --design-deep: #A36363;
+  --sound: #7D9EC4;
+  --sound-pale: #E8EFF5;
+  --sound-deep: #5A7DA3;
+  --lens: #A89464;
+  --lens-pale: #F2EDE0;
+  --lens-deep: #8A7750;
+  --radius-s: 10px;
+  --radius-m: 14px;
+  --radius-l: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 100px;
+  --shadow-s: 0 2px 12px rgba(26, 23, 20, 0.04);
+  --shadow-m: 0 8px 30px rgba(26, 23, 20, 0.06);
+  --shadow-l: 0 20px 60px rgba(26, 23, 20, 0.08);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+html, body {
+  width: 100%; height: 100%;
+  font-family: 'Sora', sans-serif;
+  background: #0f0e0d;
+  color: var(--text);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ─── DEVICE ─── */
+.device {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 390px; height: 844px;
+  background: var(--white);
+  border-radius: 44px;
+  overflow: hidden;
+  box-shadow: 0 0 0 6px #1a1714, 0 0 0 8px #2e2a25, 0 50px 140px rgba(0,0,0,0.55);
+  display: flex;
+  flex-direction: column;
+}
+
+.statusbar {
+  height: 54px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 30px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink);
+  flex-shrink: 0;
+  z-index: 60;
+  background: var(--white);
+}
+
+.statusbar .sb-icons { display: flex; gap: 4px; font-size: 0.62rem; }
+
+/* ─── SCREENS ─── */
+.screens { flex: 1; position: relative; overflow: hidden; }
+
+.scr {
+  position: absolute; inset: 0;
+  overflow-y: auto; overflow-x: hidden;
+  opacity: 0; transform: translateX(24px);
+  transition: all 0.45s var(--ease);
+  pointer-events: none;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.scr::-webkit-scrollbar { display: none; }
+.scr.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+.scr.out { opacity: 0; transform: translateX(-24px); }
+
+/* ─── BOTTOM NAV ─── */
+.bnav {
+  height: 80px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  padding-top: 8px;
+  background: var(--white);
+  border-top: 1px solid var(--beige);
+  flex-shrink: 0;
+  z-index: 60;
+}
+
+.bnav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  position: relative;
+}
+
+.bnav-icon {
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.05rem;
+  transition: transform 0.3s var(--spring);
+}
+
+.bnav-label {
+  font-size: 0.52rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  transition: color 0.3s;
+}
+
+.bnav-item.on .bnav-icon { transform: scale(1.12) translateY(-2px); }
+.bnav-item.on .bnav-label { color: var(--ink); font-weight: 600; }
+
+.bnav-item.create-nav .bnav-icon {
+  width: 42px; height: 42px;
+  background: var(--ink);
+  border-radius: 13px;
+  color: var(--white);
+  font-size: 1.2rem;
+  margin-top: -10px;
+  box-shadow: 0 4px 16px rgba(26, 23, 20, 0.2);
+  transition: all 0.25s var(--spring);
+}
+
+.bnav-item.create-nav:active .bnav-icon { transform: scale(0.9); background: var(--rose-accent); }
+
+/* ─── SOUND TOGGLE ─── */
+.snd-toggle {
+  position: absolute;
+  top: 7px; right: 56px;
+  z-index: 100;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: rgba(246,244,240,0.7);
+  border: none;
+  cursor: pointer;
+  font-size: 0.65rem;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(8px);
+}
+
+/* ═══════════════════════════════
+   SPLASH
+   ═══════════════════════════════ */
+.splash {
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.splash-grain {
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.splash-line {
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(to bottom, transparent, var(--beige-deep), transparent);
+  margin-bottom: 2rem;
+  animation: fadein 1.2s var(--ease) 0.2s both;
+}
+
+@keyframes fadein { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+.splash-mark {
+  font-size: 0.6rem;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-bottom: 1.2rem;
+  animation: fadein 1s var(--ease) 0.4s both;
+}
+
+.splash-name {
+  font-family: 'DM Serif Display', serif;
+  font-weight: 400;
+  font-size: 3.4rem;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  animation: fadein 1s var(--ease) 0.55s both;
+}
+
+.splash-dot {
+  color: var(--rose-accent);
+}
+
+.splash-sub {
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 0.95rem;
+  color: var(--text-mid);
+  margin-bottom: 0.6rem;
+  animation: fadein 1s var(--ease) 0.7s both;
+}
+
+.splash-crafts {
+  display: flex;
+  gap: 1.6rem;
+  margin: 1.8rem 0 2.8rem;
+  animation: fadein 1s var(--ease) 0.85s both;
+}
+
+.splash-craft {
+  text-align: center;
+}
+
+.splash-craft-icon {
+  width: 52px; height: 52px;
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  margin: 0 auto 0.5rem;
+  border: 1.5px solid var(--beige);
+  transition: all 0.3s var(--ease);
+}
+
+.splash-craft-icon:active { transform: scale(0.92); }
+
+.sc-design { background: var(--design-pale); border-color: rgba(196,125,125,0.2); }
+.sc-sound { background: var(--sound-pale); border-color: rgba(125,158,196,0.2); }
+.sc-lens { background: var(--lens-pale); border-color: rgba(168,148,100,0.2); }
+
+.splash-craft-label {
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+
+.splash-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  width: 100%;
+  max-width: 260px;
+  animation: fadein 1s var(--ease) 1s both;
+}
+
+.btn {
+  padding: 0.85rem;
+  border-radius: var(--radius-pill);
+  font-family: 'Sora', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.3s var(--ease);
+  border: none;
+  text-align: center;
+}
+
+.btn-dark { background: var(--ink); color: var(--white); }
+.btn-dark:active { background: var(--rose-accent); transform: scale(0.97); }
+.btn-light { background: transparent; color: var(--text-mid); border: 1.5px solid var(--beige-deep); }
+.btn-light:active { border-color: var(--rose-accent); color: var(--rose-accent); }
+
+.splash-bottom {
+  position: absolute;
+  bottom: 2rem;
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  animation: fadein 1s var(--ease) 1.2s both;
+}
+
+.splash-bottom span { position: relative; }
+.splash-bottom span + span::before {
+  content: '·';
+  position: absolute;
+  left: -0.9rem;
+  color: var(--beige-deep);
+}
+
+/* ═══════════════════════════════
+   FEED
+   ═══════════════════════════════ */
+.feed-top {
+  padding: 0.7rem 1.4rem 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 25;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.feed-brand {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.25rem;
+  color: var(--ink);
+}
+
+.feed-brand .fd { color: var(--rose-accent); }
+
+.feed-right { display: flex; gap: 0.6rem; align-items: center; }
+
+.feed-icon {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.95rem;
+  cursor: pointer;
+  position: relative;
+}
+
+.feed-icon:active { background: var(--beige); }
+
+.feed-ndot {
+  position: absolute; top: 5px; right: 6px;
+  width: 6px; height: 6px;
+  background: var(--rose-accent);
+  border-radius: 50%;
+  border: 1.5px solid var(--white);
+}
+
+.feed-av {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--beige-warm), var(--sand));
+  cursor: pointer;
+}
+
+/* Craft pills */
+.cpills {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.3rem 1.4rem 0.8rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.cpills::-webkit-scrollbar { display: none; }
+
+.cpill {
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.25s var(--ease);
+  flex-shrink: 0;
+  border: 1.5px solid transparent;
+}
+
+.cpill:active { transform: scale(0.95); }
+.cpill.call { background: var(--ink); color: var(--white); }
+.cpill.cdesign { background: var(--design-pale); color: var(--design-deep); border-color: rgba(196,125,125,0.15); }
+.cpill.csound { background: var(--sound-pale); color: var(--sound-deep); border-color: rgba(125,158,196,0.15); }
+.cpill.clens { background: var(--lens-pale); color: var(--lens-deep); border-color: rgba(168,148,100,0.15); }
+
+/* Posts */
+.posts { padding-bottom: 1rem; }
+
+.post {
+  padding: 1rem 1.4rem;
+  border-bottom: 1px solid var(--beige);
+  animation: postIn 0.5s var(--ease) both;
+}
+
+@keyframes postIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.post:nth-child(2) { animation-delay: 0.08s; }
+.post:nth-child(3) { animation-delay: 0.16s; }
+.post:nth-child(4) { animation-delay: 0.24s; }
+
+.post-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.7rem;
+}
+
+.pav {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.pav::after {
+  content: '';
+  position: absolute; inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+}
+
+.pav.ring-design::after { border-color: var(--design); }
+.pav.ring-sound::after { border-color: var(--sound); }
+.pav.ring-lens::after { border-color: var(--lens); }
+
+.pav-color { width: 100%; height: 100%; border-radius: 50%; }
+.pv1 { background: linear-gradient(135deg, var(--blush), var(--rose-accent)); }
+.pv2 { background: linear-gradient(135deg, var(--sound), var(--sound-deep)); }
+.pv3 { background: linear-gradient(135deg, var(--lens), var(--lens-deep)); }
+.pv4 { background: linear-gradient(135deg, var(--beige-warm), var(--sand)); }
+.pv5 { background: linear-gradient(135deg, var(--design), var(--sound)); }
+
+.pinfo { flex: 1; }
+.pname { font-weight: 600; font-size: 0.78rem; color: var(--ink); }
+.pmeta { font-size: 0.6rem; color: var(--text-light); display: flex; align-items: center; gap: 0.35rem; }
+
+.gtag {
+  display: inline-flex;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.gt-design { background: var(--design-pale); color: var(--design-deep); }
+.gt-sound { background: var(--sound-pale); color: var(--sound-deep); }
+.gt-lens { background: var(--lens-pale); color: var(--lens-deep); }
+
+.collab-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--pearl);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.55rem;
+  color: var(--text-mid);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  border: 1px solid var(--beige);
+}
+
+.pmedia {
+  width: 100%;
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  margin-bottom: 0.6rem;
+}
+
+/* Visual media */
+.m-visual { width: 100%; height: 240px; }
+
+/* Audio media */
+.m-audio {
+  background: var(--pearl);
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  border: 1px solid var(--beige);
+}
+
+.waveform { display: flex; align-items: center; gap: 1.5px; height: 44px; }
+
+.wbar {
+  flex: 1;
+  background: var(--sound);
+  border-radius: 1.5px;
+  opacity: 0.35;
+  transition: opacity 0.15s;
+}
+
+.wbar.on { opacity: 0.85; }
+
+.acontrols { display: flex; align-items: center; gap: 0.7rem; }
+
+.playbtn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--sound-deep);
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem;
+  cursor: pointer;
+  border: none;
+  flex-shrink: 0;
+  transition: transform 0.2s var(--spring);
+}
+
+.playbtn:active { transform: scale(0.88); }
+
+.ainfo { flex: 1; }
+.atitle { font-family: 'DM Serif Display', serif; font-size: 0.85rem; color: var(--ink); }
+.adur { font-size: 0.58rem; color: var(--sound-deep); }
+
+/* Literary media */
+.m-text {
+  background: var(--pearl);
+  padding: 1.6rem 1.3rem;
+  border: 1px solid var(--beige);
+}
+
+.ltext {
+  font-family: 'Lora', serif;
+  font-size: 0.88rem;
+  line-height: 1.9;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.lform {
+  font-family: 'Sora', sans-serif;
+  font-style: normal;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-top: 0.8rem;
+}
+
+/* Actions */
+.pactions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.2rem;
+}
+
+.pact {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.68rem;
+  color: var(--text-light);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.pact:active { transform: scale(0.92); }
+.pact .pi { font-size: 0.95rem; transition: transform 0.3s var(--spring); }
+.pact.liked .pi { color: var(--rose-accent); transform: scale(1.2); }
+.pact.liked { color: var(--rose-accent); }
+
+.pcap {
+  margin-top: 0.4rem;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.pcap b { font-weight: 600; color: var(--ink); }
+
+/* ═══════════════════════════════
+   THREE CRAFTS
+   ═══════════════════════════════ */
+.crafts-top {
+  padding: 1.2rem 1.4rem 0.8rem;
+  position: sticky; top: 0; z-index: 25;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(20px);
+}
+
+.crafts-top h2 {
+  font-family: 'DM Serif Display', serif;
+  font-weight: 400;
+  font-size: 1.5rem;
+  color: var(--ink);
+}
+
+.crafts-top p {
+  font-size: 0.72rem;
+  color: var(--text-light);
+  margin-top: 0.15rem;
+  font-family: 'Lora', serif;
+  font-style: italic;
+}
+
+.craft-block {
+  padding: 0.8rem 1.4rem;
+}
+
+.craft-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  cursor: pointer;
+  padding: 0.5rem 0;
+}
+
+.craft-ic {
+  width: 42px; height: 42px;
+  border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.ci-design { background: var(--design-pale); }
+.ci-sound { background: var(--sound-pale); }
+.ci-lens { background: var(--lens-pale); }
+
+.craft-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.craft-sub {
+  font-size: 0.58rem;
+  color: var(--text-light);
+  margin-top: 0.05rem;
+}
+
+.craft-arr {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  transition: transform 0.3s var(--ease);
+}
+
+.craft-head.open .craft-arr { transform: rotate(90deg); }
+
+.subs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.5s var(--ease), opacity 0.3s;
+  padding-bottom: 0;
+}
+
+.subs.exp {
+  max-height: 800px;
+  opacity: 1;
+  padding-bottom: 0.5rem;
+}
+
+.sub-card {
+  border-radius: var(--radius-m);
+  padding: 0.9rem;
+  cursor: pointer;
+  transition: all 0.25s var(--ease);
+  border: 1px solid transparent;
+}
+
+.sub-card:active { transform: scale(0.97); }
+
+.sub-card.sd { background: linear-gradient(150deg, var(--design-pale), rgba(196,125,125,0.04)); border-color: rgba(196,125,125,0.08); }
+.sub-card.ss { background: linear-gradient(150deg, var(--sound-pale), rgba(125,158,196,0.04)); border-color: rgba(125,158,196,0.08); }
+.sub-card.sl { background: linear-gradient(150deg, var(--lens-pale), rgba(168,148,100,0.04)); border-color: rgba(168,148,100,0.08); }
+
+.sub-emoji { font-size: 1.4rem; margin-bottom: 0.4rem; }
+.sub-name { font-family: 'DM Serif Display', serif; font-size: 0.8rem; color: var(--ink); margin-bottom: 0.1rem; }
+.sub-upload { font-size: 0.52rem; color: var(--text-light); display: flex; align-items: center; gap: 0.2rem; }
+.sub-upload::before { content: '↑'; font-size: 0.5rem; opacity: 0.4; }
+
+/* ═══════════════════════════════
+   CREATE
+   ═══════════════════════════════ */
+.create-top {
+  padding: 0.8rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 25;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(20px);
+}
+
+.cr-back {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+}
+
+.cr-title { font-family: 'DM Serif Display', serif; font-size: 1.05rem; }
+
+.cr-share {
+  padding: 0.35rem 1rem;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--white);
+  font-size: 0.68rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.cr-share:active { background: var(--rose-accent); transform: scale(0.96); }
+
+.cr-body { padding: 0.8rem 1.4rem; }
+
+.cr-label {
+  font-size: 0.55rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 0.7rem;
+  font-weight: 500;
+}
+
+.cr-crafts {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.3rem;
+}
+
+.cr-opt {
+  flex: 1;
+  padding: 0.9rem 0.4rem;
+  border-radius: var(--radius-m);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s var(--ease);
+  border: 2px solid transparent;
+}
+
+.cr-opt:active { transform: scale(0.96); }
+.cr-opt-icon { font-size: 1.6rem; margin-bottom: 0.3rem; }
+.cr-opt-label { font-family: 'DM Serif Display', serif; font-size: 0.75rem; }
+
+.cr-opt.o-design { background: var(--design-pale); }
+.cr-opt.o-sound { background: var(--sound-pale); }
+.cr-opt.o-lens { background: var(--lens-pale); }
+.cr-opt.sel { border-color: var(--ink); box-shadow: var(--shadow-s); }
+
+.cr-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1.3rem;
+}
+
+.cr-chip {
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.63rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1.5px solid var(--beige);
+  background: var(--white);
+  color: var(--text);
+}
+
+.cr-chip:active { transform: scale(0.95); }
+.cr-chip.sel { background: var(--ink); color: var(--white); border-color: var(--ink); }
+
+.cr-upload {
+  border-radius: var(--radius-l);
+  padding: 1.8rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s var(--ease);
+  margin-bottom: 1.3rem;
+  border: 1.5px dashed var(--beige-deep);
+  position: relative;
+}
+
+.cr-upload:active { transform: scale(0.98); }
+
+.cr-upload.uz-design { background: linear-gradient(150deg, var(--design-pale), var(--white)); border-color: rgba(196,125,125,0.25); }
+.cr-upload.uz-sound { background: linear-gradient(150deg, var(--sound-pale), var(--white)); border-color: rgba(125,158,196,0.25); }
+.cr-upload.uz-lens { background: linear-gradient(150deg, var(--lens-pale), var(--white)); border-color: rgba(168,148,100,0.25); }
+
+.uz-icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.uz-label { font-family: 'DM Serif Display', serif; font-size: 0.92rem; margin-bottom: 0.25rem; }
+.uz-formats { font-size: 0.6rem; color: var(--text-light); line-height: 1.5; }
+
+.cr-textarea {
+  width: 100%;
+  border: none;
+  background: var(--pearl);
+  border-radius: var(--radius-m);
+  padding: 0.9rem;
+  font-family: 'Lora', serif;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--ink);
+  resize: none;
+  min-height: 72px;
+  outline: none;
+  transition: box-shadow 0.3s;
+  border: 1px solid var(--beige);
+}
+
+.cr-textarea:focus { box-shadow: 0 0 0 2px var(--blush-soft); }
+.cr-textarea::placeholder { color: var(--text-faint); font-style: italic; }
+
+.cr-collab-zone {
+  border-radius: var(--radius-m);
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  background: var(--pearl);
+  border: 1px solid var(--beige);
+  margin-top: 1.3rem;
+}
+
+.cr-collab-zone .uz-icon { font-size: 1.3rem; margin-bottom: 0.2rem; }
+.cr-collab-zone .uz-label { font-size: 0.8rem; }
+
+/* ═══════════════════════════════
+   COLLABORATION SPACE
+   ═══════════════════════════════ */
+.co-top {
+  padding: 1rem 1.4rem 0;
+  position: sticky; top: 0; z-index: 25;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(20px);
+}
+
+.co-top h2 {
+  font-family: 'DM Serif Display', serif;
+  font-weight: 400;
+  font-size: 1.4rem;
+}
+
+.co-tabs {
+  display: flex;
+  margin-top: 0.7rem;
+  border-bottom: 1px solid var(--beige);
+}
+
+.co-tab {
+  flex: 1;
+  text-align: center;
+  padding: 0.55rem 0;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text-light);
+  cursor: pointer;
+  position: relative;
+}
+
+.co-tab.on { color: var(--ink); }
+
+.co-tab.on::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 22%; right: 22%;
+  height: 1.5px;
+  background: var(--ink);
+  border-radius: 1px;
+}
+
+.co-body { padding: 0.8rem 1.4rem; }
+
+.proj {
+  background: var(--pearl);
+  border-radius: var(--radius-l);
+  padding: 1.1rem;
+  margin-bottom: 0.7rem;
+  cursor: pointer;
+  border: 1px solid var(--beige);
+  transition: all 0.25s var(--ease);
+}
+
+.proj:active { transform: scale(0.98); box-shadow: var(--shadow-m); }
+
+.proj-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.proj-author {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.proj-av { width: 26px; height: 26px; border-radius: 50%; }
+.proj-aname { font-size: 0.68rem; font-weight: 500; }
+
+.proj-stat {
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.18rem 0.5rem;
+  border-radius: var(--radius-pill);
+}
+
+.ps-open { background: rgba(125,184,143,0.12); color: #5a9e6e; }
+.ps-active { background: var(--sound-pale); color: var(--sound-deep); }
+.ps-seeking { background: var(--design-pale); color: var(--design-deep); }
+
+.proj-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 0.98rem;
+  margin-bottom: 0.25rem;
+  color: var(--ink);
+}
+
+.proj-desc {
+  font-size: 0.7rem;
+  color: var(--text-light);
+  line-height: 1.5;
+  margin-bottom: 0.7rem;
+}
+
+.proj-tags {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.7rem;
+}
+
+.proj-tag {
+  font-size: 0.52rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+}
+
+.proj-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.proj-members {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.mstack { display: flex; }
+
+.mav {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--pearl);
+  margin-right: -7px;
+}
+
+.mcount { font-size: 0.58rem; color: var(--text-light); margin-left: 0.2rem; }
+
+.proj-apply {
+  font-size: 0.64rem;
+  font-weight: 600;
+  color: var(--rose-accent);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  letter-spacing: 0.03em;
+}
+
+.proj-apply:active { color: var(--ink); }
+
+/* ═══════════════════════════════
+   PROFILE
+   ═══════════════════════════════ */
+.prof-cover {
+  height: 130px;
+  background: linear-gradient(135deg, var(--pearl), var(--beige), var(--beige-warm));
+  position: relative;
+}
+
+.prof-av-wrap { position: absolute; bottom: -30px; left: 1.4rem; }
+
+.prof-av {
+  width: 66px; height: 66px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--beige-warm), var(--sand));
+  border: 3px solid var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: var(--shadow-m);
+}
+
+.prof-body { padding: 2.5rem 1.4rem 0.8rem; }
+
+.prof-name { font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: var(--ink); margin-bottom: 0.08rem; }
+.prof-handle { font-size: 0.68rem; color: var(--text-faint); margin-bottom: 0.5rem; }
+
+.prof-tags { display: flex; gap: 0.25rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+
+.prof-bio {
+  font-size: 0.78rem;
+  color: var(--text-mid);
+  line-height: 1.6;
+  font-family: 'Lora', serif;
+  font-style: italic;
+  margin-bottom: 0.9rem;
+}
+
+.prof-stats {
+  display: flex;
+  gap: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.ps-item { text-align: center; }
+.ps-num { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--ink); }
+.ps-lbl { font-size: 0.52rem; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+
+.prof-btns {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.prof-btn {
+  flex: 1;
+  padding: 0.55rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  transition: all 0.2s;
+}
+
+.pb-edit { background: var(--pearl); color: var(--ink); border: 1.5px solid var(--beige); }
+.pb-share { background: var(--ink); color: var(--white); }
+
+.prof-gtabs {
+  display: flex;
+  border-bottom: 1px solid var(--beige);
+  margin-bottom: 0.8rem;
+}
+
+.prof-gtab {
+  flex: 1;
+  text-align: center;
+  padding: 0.5rem;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  cursor: pointer;
+  position: relative;
+}
+
+.prof-gtab.on { color: var(--ink); }
+.prof-gtab.on::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 28%; right: 28%;
+  height: 1.5px;
+  background: var(--ink);
+  border-radius: 1px;
+}
+
+.prof-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+
+.gcell {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+}
+
+.gcell:active { opacity: 0.85; }
+.gcell .gc-bg { width: 100%; height: 100%; }
+
+.gc1 { background: linear-gradient(135deg, var(--beige-warm), var(--sand)); }
+.gc2 { background: linear-gradient(135deg, var(--blush-soft), var(--blush)); }
+.gc3 { background: linear-gradient(140deg, var(--sound), var(--sound-pale)); }
+.gc4 { background: linear-gradient(135deg, var(--lens-pale), var(--lens)); }
+.gc5 { background: linear-gradient(150deg, var(--beige), var(--pearl)); }
+.gc6 { background: linear-gradient(135deg, var(--design-pale), var(--blush-soft)); }
+
+.gc-badge {
+  position: absolute;
+  bottom: 4px; left: 4px;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  font-size: 0.4rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.gcb-sound { background: rgba(0,0,0,0.5); color: white; }
+.gcb-text { background: rgba(0,0,0,0.5); color: white; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-height: 700px) {
+  .device { height: 95vh; width: calc(95vh * 0.462); }
+}
+
+@media (max-width: 420px) {
+  .device { width: 100vw; height: 100vh; border-radius: 0; box-shadow: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="device">
+  <div class="statusbar">
+    <span>9:41</span>
+    <span class="sb-icons">📶 📡 🔋</span>
+  </div>
+
+  <button class="snd-toggle" id="sndBtn" title="Toggle sounds">🔊</button>
+
+  <div class="screens">
+
+    <!-- ═══ SPLASH ═══ -->
+    <div class="scr active" id="s-splash">
+      <div class="splash">
+        <div class="splash-grain"></div>
+        <div class="splash-line"></div>
+        <div class="splash-mark">The Creative Platform</div>
+        <div class="splash-name">Atelier<span class="splash-dot">.</span></div>
+        <div class="splash-sub">Where artists build together</div>
+        <div class="splash-crafts">
+          <div class="splash-craft">
+            <div class="splash-craft-icon sc-design">🎨</div>
+            <div class="splash-craft-label">Design</div>
+          </div>
+          <div class="splash-craft">
+            <div class="splash-craft-icon sc-sound">🎵</div>
+            <div class="splash-craft-label">Sound</div>
+          </div>
+          <div class="splash-craft">
+            <div class="splash-craft-icon sc-lens">📷</div>
+            <div class="splash-craft-label">Lens</div>
+          </div>
+        </div>
+        <div class="splash-btns">
+          <button class="btn btn-dark" onclick="goTo('feed')">Enter Atelier</button>
+          <button class="btn btn-light">I have an account</button>
+        </div>
+        <div class="splash-bottom">
+          <span>Design</span>
+          <span>Sound</span>
+          <span>Lens</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FEED ═══ -->
+    <div class="scr" id="s-feed">
+      <div class="feed-top">
+        <div class="feed-brand">Atelier<span class="fd">.</span></div>
+        <div class="feed-right">
+          <div class="feed-icon">🔔<div class="feed-ndot"></div></div>
+          <div class="feed-av" onclick="goTo('profile')"></div>
+        </div>
+      </div>
+
+      <div class="cpills">
+        <div class="cpill call">All</div>
+        <div class="cpill cdesign">🎨 Design</div>
+        <div class="cpill csound">🎵 Sound</div>
+        <div class="cpill clens">📷 Lens</div>
+      </div>
+
+      <div class="posts">
+        <!-- Design Post -->
+        <div class="post">
+          <div class="post-head">
+            <div class="pav ring-design"><div class="pav-color pv1"></div></div>
+            <div class="pinfo">
+              <div class="pname">Luna Mercer</div>
+              <div class="pmeta"><span class="gtag gt-design">Illustration</span> · 2h</div>
+            </div>
+          </div>
+          <div class="collab-badge">✦ Collab with Kai Fontaine</div>
+          <div class="pmedia">
+            <div class="m-visual" style="background: linear-gradient(135deg, #E5DDD2 0%, #D4A0A0 25%, #C8BBAA 50%, #7D9EC4 80%, #F6F4F0 100%); height: 250px;"></div>
+          </div>
+          <div class="pactions">
+            <button class="pact liked" onclick="doLike(this)"><span class="pi">♥</span> 247</button>
+            <button class="pact"><span class="pi">💬</span> 32</button>
+            <button class="pact"><span class="pi">✦</span> Collab</button>
+            <button class="pact" style="margin-left:auto"><span class="pi">⊹</span></button>
+          </div>
+          <div class="pcap"><b>Luna Mercer</b> Duality in bloom — mixed illustration exploring the space between memory and imagination ✦</div>
+        </div>
+
+        <!-- Sound Post -->
+        <div class="post">
+          <div class="post-head">
+            <div class="pav ring-sound"><div class="pav-color pv2"></div></div>
+            <div class="pinfo">
+              <div class="pname">Amir Hassen</div>
+              <div class="pmeta"><span class="gtag gt-sound">Ambient</span> · 4h</div>
+            </div>
+          </div>
+          <div class="pmedia">
+            <div class="m-audio">
+              <div class="acontrols">
+                <button class="playbtn" onclick="playAmbient()">▶</button>
+                <div class="ainfo">
+                  <div class="atitle">Nocturne in Soft Rain</div>
+                  <div class="adur">3:42 · Ambient / Field Recording</div>
+                </div>
+              </div>
+              <div class="waveform" id="wf1"></div>
+            </div>
+          </div>
+          <div class="pactions">
+            <button class="pact" onclick="doLike(this)"><span class="pi">♡</span> 183</button>
+            <button class="pact"><span class="pi">💬</span> 18</button>
+            <button class="pact"><span class="pi">✦</span> Collab</button>
+            <button class="pact" style="margin-left:auto"><span class="pi">⊹</span></button>
+          </div>
+          <div class="pcap"><b>Amir Hassen</b> Recorded during a midnight walk through the medina. The rain said everything I couldn't.</div>
+        </div>
+
+        <!-- Lens Post -->
+        <div class="post">
+          <div class="post-head">
+            <div class="pav ring-lens"><div class="pav-color pv3"></div></div>
+            <div class="pinfo">
+              <div class="pname">Mira Okafor</div>
+              <div class="pmeta"><span class="gtag gt-lens">Street</span> · 6h</div>
+            </div>
+          </div>
+          <div class="pmedia">
+            <div class="m-visual" style="background: linear-gradient(165deg, #1A1714 0%, #6B6159 35%, #C8BBAA 65%, #EDE8E0 90%, #FAFAFA 100%); height: 230px;"></div>
+          </div>
+          <div class="pactions">
+            <button class="pact" onclick="doLike(this)"><span class="pi">♡</span> 312</button>
+            <button class="pact"><span class="pi">💬</span> 47</button>
+            <button class="pact"><span class="pi">✦</span> Collab</button>
+            <button class="pact" style="margin-left:auto"><span class="pi">⊹</span></button>
+          </div>
+          <div class="pcap"><b>Mira Okafor</b> Light studies, Marrakech. The way shadow carves architecture.</div>
+        </div>
+
+        <!-- Literary/Design Post -->
+        <div class="post">
+          <div class="post-head">
+            <div class="pav ring-design"><div class="pav-color pv4"></div></div>
+            <div class="pinfo">
+              <div class="pname">Elena Rossi</div>
+              <div class="pmeta"><span class="gtag gt-design">Typography</span> · 9h</div>
+            </div>
+          </div>
+          <div class="pmedia">
+            <div class="m-text">
+              <div class="ltext">
+                I fold myself into<br>
+                the quiet of unfinished things —<br>
+                half-drawn faces,<br>
+                songs without endings,<br>
+                letters sent to no one.<br><br>
+                Even unfinished,<br>
+                they breathe.
+              </div>
+              <div class="lform">Typographic Poster · Poetry × Design</div>
+            </div>
+          </div>
+          <div class="pactions">
+            <button class="pact" onclick="doLike(this)"><span class="pi">♡</span> 198</button>
+            <button class="pact"><span class="pi">💬</span> 24</button>
+            <button class="pact"><span class="pi">✦</span> Collab</button>
+            <button class="pact" style="margin-left:auto"><span class="pi">⊹</span></button>
+          </div>
+          <div class="pcap"><b>Elena Rossi</b> From my new type poster series. Looking for a sound artist to score a reading of these ✦</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CRAFTS ═══ -->
+    <div class="scr" id="s-crafts">
+      <div class="crafts-top">
+        <h2>The Three Crafts</h2>
+        <p>Every art finds its home</p>
+      </div>
+
+      <!-- DESIGN -->
+      <div class="craft-block">
+        <div class="craft-head open" onclick="toggleC(this)">
+          <div class="craft-ic ci-design">🎨</div>
+          <div>
+            <div class="craft-name">Design</div>
+            <div class="craft-sub">Illustration, Typography, UI, Motion, 3D & more</div>
+          </div>
+          <div class="craft-arr">›</div>
+        </div>
+        <div class="subs exp">
+          <div class="sub-card sd"><div class="sub-emoji">🖌️</div><div class="sub-name">Illustration</div><div class="sub-upload">PNG, SVG, PSD, process video</div></div>
+          <div class="sub-card sd"><div class="sub-emoji">🔤</div><div class="sub-name">Typography</div><div class="sub-upload">OTF, TTF, specimen PDF</div></div>
+          <div class="sub-card sd"><div class="sub-emoji">📱</div><div class="sub-name">UI / UX</div><div class="sub-upload">Figma link, PNG, prototype</div></div>
+          <div class="sub-card sd"><div class="sub-emoji">🎞️</div><div class="sub-name">Motion</div><div class="sub-upload">MP4, GIF, After Effects</div></div>
+          <div class="sub-card sd"><div class="sub-emoji">🧊</div><div class="sub-name">3D</div><div class="sub-upload">GLB, OBJ, 360° capture</div></div>
+          <div class="sub-card sd"><div class="sub-emoji">🖼️</div><div class="sub-name">Fine Art</div><div class="sub-upload">Hi-res image, series gallery</div></div>
+          <div class="sub-card sd"><div class="sub-emoji">📐</div><div class="sub-name">Architecture</div><div class="sub-upload">Renders, plans, walkthrough</div></div>
+          <div class="sub-card sd"><div class="sub-emoji">👗</div><div class="sub-name">Fashion</div><div class="sub-upload">Sketches, lookbook, video</div></div>
+        </div>
+      </div>
+
+      <!-- SOUND -->
+      <div class="craft-block">
+        <div class="craft-head" onclick="toggleC(this)">
+          <div class="craft-ic ci-sound">🎵</div>
+          <div>
+            <div class="craft-name">Sound</div>
+            <div class="craft-sub">Music, Composition, Mixing, Podcasts & more</div>
+          </div>
+          <div class="craft-arr">›</div>
+        </div>
+        <div class="subs">
+          <div class="sub-card ss"><div class="sub-emoji">🎹</div><div class="sub-name">Composition</div><div class="sub-upload">WAV, FLAC, MIDI, score</div></div>
+          <div class="sub-card ss"><div class="sub-emoji">🎤</div><div class="sub-name">Vocal</div><div class="sub-upload">WAV stems, acapella</div></div>
+          <div class="sub-card ss"><div class="sub-emoji">🌊</div><div class="sub-name">Ambient</div><div class="sub-upload">Lossless, field recording</div></div>
+          <div class="sub-card ss"><div class="sub-emoji">🥁</div><div class="sub-name">Beats & Production</div><div class="sub-upload">MP3, WAV, stem packs</div></div>
+          <div class="sub-card ss"><div class="sub-emoji">🔊</div><div class="sub-name">Sound Design</div><div class="sub-upload">SFX, Foley, WAV</div></div>
+          <div class="sub-card ss"><div class="sub-emoji">🎧</div><div class="sub-name">DJ / Mix</div><div class="sub-upload">Full mix, tracklist</div></div>
+          <div class="sub-card ss"><div class="sub-emoji">🎙️</div><div class="sub-name">Podcast</div><div class="sub-upload">MP3, WAV, transcript</div></div>
+          <div class="sub-card ss"><div class="sub-emoji">🎻</div><div class="sub-name">Classical</div><div class="sub-upload">Score PDF, recording</div></div>
+        </div>
+      </div>
+
+      <!-- LENS -->
+      <div class="craft-block">
+        <div class="craft-head" onclick="toggleC(this)">
+          <div class="craft-ic ci-lens">📷</div>
+          <div>
+            <div class="craft-name">Lens</div>
+            <div class="craft-sub">Photography, Film, Documentary, Drone & more</div>
+          </div>
+          <div class="craft-arr">›</div>
+        </div>
+        <div class="subs">
+          <div class="sub-card sl"><div class="sub-emoji">📸</div><div class="sub-name">Portrait</div><div class="sub-upload">RAW, JPEG, TIFF</div></div>
+          <div class="sub-card sl"><div class="sub-emoji">🏙️</div><div class="sub-name">Street</div><div class="sub-upload">Image series, photo essay</div></div>
+          <div class="sub-card sl"><div class="sub-emoji">🎬</div><div class="sub-name">Short Film</div><div class="sub-upload">MP4, MOV up to 15min</div></div>
+          <div class="sub-card sl"><div class="sub-emoji">📹</div><div class="sub-name">Documentary</div><div class="sub-upload">Video, interview clips</div></div>
+          <div class="sub-card sl"><div class="sub-emoji">🌄</div><div class="sub-name">Landscape</div><div class="sub-upload">Hi-res, panoramic stitch</div></div>
+          <div class="sub-card sl"><div class="sub-emoji">🛸</div><div class="sub-name">Drone / Aerial</div><div class="sub-upload">4K video, aerial stills</div></div>
+          <div class="sub-card sl"><div class="sub-emoji">🎥</div><div class="sub-name">Music Video</div><div class="sub-upload">MP4, MOV, BTS footage</div></div>
+          <div class="sub-card sl"><div class="sub-emoji">🔬</div><div class="sub-name">Macro / Abstract</div><div class="sub-upload">Hi-res, focus stack</div></div>
+        </div>
+      </div>
+      <div style="height: 1rem;"></div>
+    </div>
+
+    <!-- ═══ CREATE ═══ -->
+    <div class="scr" id="s-create">
+      <div class="create-top">
+        <button class="cr-back" onclick="goTo('feed')">✕ Close</button>
+        <div class="cr-title">New Work</div>
+        <button class="cr-share">Share</button>
+      </div>
+      <div class="cr-body">
+        <div class="cr-label">Choose Your Craft</div>
+        <div class="cr-crafts">
+          <div class="cr-opt o-design sel" onclick="pickCraft(this,'design')">
+            <div class="cr-opt-icon">🎨</div>
+            <div class="cr-opt-label">Design</div>
+          </div>
+          <div class="cr-opt o-sound" onclick="pickCraft(this,'sound')">
+            <div class="cr-opt-icon">🎵</div>
+            <div class="cr-opt-label">Sound</div>
+          </div>
+          <div class="cr-opt o-lens" onclick="pickCraft(this,'lens')">
+            <div class="cr-opt-icon">📷</div>
+            <div class="cr-opt-label">Lens</div>
+          </div>
+        </div>
+
+        <div class="cr-label">Subgenre</div>
+        <div class="cr-chips" id="crChips">
+          <div class="cr-chip sel" onclick="pickChip(this)">Illustration</div>
+          <div class="cr-chip" onclick="pickChip(this)">Typography</div>
+          <div class="cr-chip" onclick="pickChip(this)">UI / UX</div>
+          <div class="cr-chip" onclick="pickChip(this)">Motion</div>
+          <div class="cr-chip" onclick="pickChip(this)">3D</div>
+          <div class="cr-chip" onclick="pickChip(this)">Fine Art</div>
+          <div class="cr-chip" onclick="pickChip(this)">Architecture</div>
+          <div class="cr-chip" onclick="pickChip(this)">Fashion</div>
+        </div>
+
+        <div class="cr-label">Upload</div>
+        <div class="cr-upload uz-design" id="crUpload">
+          <div class="uz-icon">🎨</div>
+          <div class="uz-label">Drop your design work</div>
+          <div class="uz-formats">PNG, SVG, PSD, AI, PDF · Up to 50MB<br>Process video or timelapse optional</div>
+        </div>
+
+        <div class="cr-label">Description</div>
+        <textarea class="cr-textarea" placeholder="Tell the story behind this piece..."></textarea>
+
+        <div class="cr-collab-zone">
+          <div class="uz-icon">✦</div>
+          <div class="uz-label">Invite collaborators</div>
+          <div class="uz-formats">Search artists to co-credit</div>
+        </div>
+        <div style="height: 5rem;"></div>
+      </div>
+    </div>
+
+    <!-- ═══ COLLAB ═══ -->
+    <div class="scr" id="s-collab">
+      <div class="co-top">
+        <h2>Collaboration</h2>
+        <div class="co-tabs">
+          <div class="co-tab on">Browse</div>
+          <div class="co-tab">My Projects</div>
+          <div class="co-tab">Invites</div>
+        </div>
+      </div>
+      <div class="co-body">
+        <div class="proj">
+          <div class="proj-top">
+            <div class="proj-author"><div class="proj-av pv1"></div><div class="proj-aname">Elena Rossi</div></div>
+            <div class="proj-stat ps-open">Open</div>
+          </div>
+          <div class="proj-title">Type Poster × Sound Series</div>
+          <div class="proj-desc">Pairing typographic posters with ambient soundscapes. Each poster becomes an audio-visual piece. Need sound artists.</div>
+          <div class="proj-tags">
+            <span class="proj-tag gt-design">Design</span>
+            <span class="proj-tag gt-sound">Sound</span>
+          </div>
+          <div class="proj-foot">
+            <div class="proj-members"><div class="mstack"><div class="mav pv1"></div><div class="mav pv3"></div><div class="mav pv4"></div></div><div class="mcount">3 of 6</div></div>
+            <button class="proj-apply">Apply →</button>
+          </div>
+        </div>
+
+        <div class="proj">
+          <div class="proj-top">
+            <div class="proj-author"><div class="proj-av pv2"></div><div class="proj-aname">Amir Hassen</div></div>
+            <div class="proj-stat ps-seeking">Seeking</div>
+          </div>
+          <div class="proj-title">Ambient Score × Generative Visuals</div>
+          <div class="proj-desc">Immersive audiovisual installation. Need a creative coder for real-time reactive visuals synced to ambient compositions.</div>
+          <div class="proj-tags">
+            <span class="proj-tag gt-sound">Sound</span>
+            <span class="proj-tag gt-design">Motion</span>
+          </div>
+          <div class="proj-foot">
+            <div class="proj-members"><div class="mstack"><div class="mav pv2"></div></div><div class="mcount">1 of 3</div></div>
+            <button class="proj-apply">Apply →</button>
+          </div>
+        </div>
+
+        <div class="proj">
+          <div class="proj-top">
+            <div class="proj-author"><div class="proj-av pv5"></div><div class="proj-aname">Kai Fontaine</div></div>
+            <div class="proj-stat ps-active">Active</div>
+          </div>
+          <div class="proj-title">Short Film — "Bloom"</div>
+          <div class="proj-desc">5-minute experimental short about growth. Seeking a composer for the score and a photographer for behind-the-scenes.</div>
+          <div class="proj-tags">
+            <span class="proj-tag gt-lens">Film</span>
+            <span class="proj-tag gt-sound">Composition</span>
+            <span class="proj-tag gt-lens">Photography</span>
+          </div>
+          <div class="proj-foot">
+            <div class="proj-members"><div class="mstack"><div class="mav pv5"></div><div class="mav pv4"></div></div><div class="mcount">2 of 4</div></div>
+            <button class="proj-apply">Apply →</button>
+          </div>
+        </div>
+
+        <div class="proj">
+          <div class="proj-top">
+            <div class="proj-author"><div class="proj-av pv3"></div><div class="proj-aname">Mira Okafor</div></div>
+            <div class="proj-stat ps-open">Open</div>
+          </div>
+          <div class="proj-title">Cultural Exchange Series</div>
+          <div class="proj-desc">Artists from different cultures pair up. Each creates a piece inspired by the other's heritage — any craft welcome.</div>
+          <div class="proj-tags">
+            <span class="proj-tag gt-design">Design</span>
+            <span class="proj-tag gt-lens">Lens</span>
+            <span class="proj-tag gt-sound">Sound</span>
+          </div>
+          <div class="proj-foot">
+            <div class="proj-members"><div class="mstack"><div class="mav pv3"></div><div class="mav pv1"></div><div class="mav pv2"></div><div class="mav pv5"></div></div><div class="mcount">6 of 10</div></div>
+            <button class="proj-apply">Apply →</button>
+          </div>
+        </div>
+        <div style="height: 1.5rem;"></div>
+      </div>
+    </div>
+
+    <!-- ═══ PROFILE ═══ -->
+    <div class="scr" id="s-profile">
+      <div class="prof-cover"></div>
+      <div class="prof-av-wrap"><div class="prof-av">✦</div></div>
+      <div class="prof-body">
+        <div class="prof-name">You</div>
+        <div class="prof-handle">@yourusername</div>
+        <div class="prof-tags">
+          <span class="gtag gt-design">Design</span>
+          <span class="gtag gt-lens">Lens</span>
+        </div>
+        <div class="prof-bio">Creating at the intersection of design and light. Always seeking the unexpected collaboration.</div>
+        <div class="prof-stats">
+          <div class="ps-item"><div class="ps-num">24</div><div class="ps-lbl">Works</div></div>
+          <div class="ps-item"><div class="ps-num">7</div><div class="ps-lbl">Collabs</div></div>
+          <div class="ps-item"><div class="ps-num">1.2k</div><div class="ps-lbl">Followers</div></div>
+          <div class="ps-item"><div class="ps-num">340</div><div class="ps-lbl">Following</div></div>
+        </div>
+        <div class="prof-btns">
+          <button class="prof-btn pb-edit">Edit Profile</button>
+          <button class="prof-btn pb-share">Share</button>
+        </div>
+        <div class="prof-gtabs">
+          <div class="prof-gtab on">Works</div>
+          <div class="prof-gtab">Collabs</div>
+          <div class="prof-gtab">About</div>
+        </div>
+        <div class="prof-grid">
+          <div class="gcell"><div class="gc-bg gc1"></div></div>
+          <div class="gcell"><div class="gc-bg gc2"></div></div>
+          <div class="gcell"><div class="gc-bg gc3"></div><div class="gc-badge gcb-sound">♪ Sound</div></div>
+          <div class="gcell"><div class="gc-bg gc4"></div></div>
+          <div class="gcell"><div class="gc-bg gc5"></div></div>
+          <div class="gcell"><div class="gc-bg gc6"></div></div>
+          <div class="gcell"><div class="gc-bg gc1"></div></div>
+          <div class="gcell"><div class="gc-bg gc3"></div><div class="gc-badge gcb-sound">♪ Sound</div></div>
+          <div class="gcell"><div class="gc-bg gc4"></div></div>
+        </div>
+        <div style="height: 1.5rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="bnav" id="bnav" style="display:none;">
+    <div class="bnav-item on" onclick="goTo('feed')" data-s="feed">
+      <div class="bnav-icon">🏠</div>
+      <div class="bnav-label">Home</div>
+    </div>
+    <div class="bnav-item" onclick="goTo('crafts')" data-s="crafts">
+      <div class="bnav-icon">◈</div>
+      <div class="bnav-label">Crafts</div>
+    </div>
+    <div class="bnav-item create-nav" onclick="goTo('create')" data-s="create">
+      <div class="bnav-icon">+</div>
+    </div>
+    <div class="bnav-item" onclick="goTo('collab')" data-s="collab">
+      <div class="bnav-icon">✦</div>
+      <div class="bnav-label">Collab</div>
+    </div>
+    <div class="bnav-item" onclick="goTo('profile')" data-s="profile">
+      <div class="bnav-icon">⊹</div>
+      <div class="bnav-label">You</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── AUDIO ENGINE ───
+const AC = window.AudioContext || window.webkitAudioContext;
+let ac; let sndOn = true;
+
+function init() { if (!ac) ac = new AC(); }
+
+function tone(f, dur, type='sine', vol=0.06) {
+  if (!sndOn) return; init();
+  const o = ac.createOscillator(), g = ac.createGain(), fl = ac.createBiquadFilter();
+  fl.type = 'lowpass'; fl.frequency.value = 1800;
+  o.type = type; o.frequency.setValueAtTime(f, ac.currentTime);
+  g.gain.setValueAtTime(0, ac.currentTime);
+  g.gain.linearRampToValueAtTime(vol, ac.currentTime + 0.015);
+  g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+  o.connect(fl); fl.connect(g); g.connect(ac.destination);
+  o.start(); o.stop(ac.currentTime + dur);
+}
+
+function chime(notes, gap=0.065) {
+  if (!sndOn) return;
+  notes.forEach((f,i) => setTimeout(() => tone(f, 0.28, 'sine', 0.05), i * gap * 1000));
+}
+
+const sfx = {
+  nav: () => chime([587, 740, 880], 0.055),
+  tap: () => tone(932, 0.08, 'sine', 0.035),
+  like: () => chime([740, 880, 1109], 0.045),
+  create: () => chime([440, 554, 659, 880], 0.06),
+  collab: () => chime([554, 659, 880, 1109, 1319], 0.055),
+  craft: () => tone(494, 0.12, 'triangle', 0.04),
+  enter: () => chime([294, 370, 440, 554, 659], 0.09),
+  ambient: () => { if (!sndOn) return; init(); [247, 311, 370, 494].forEach((f,i) => setTimeout(() => tone(f, 1.8, 'sine', 0.025), i * 180)); }
+};
+
+document.getElementById('sndBtn').addEventListener('click', () => {
+  sndOn = !sndOn;
+  document.getElementById('sndBtn').textContent = sndOn ? '🔊' : '🔇';
+});
+
+// ─── NAVIGATION ───
+let cur = 'splash';
+
+function goTo(id) {
+  if (id === cur) return;
+  const c = document.getElementById('s-' + cur);
+  const n = document.getElementById('s-' + id);
+  if (!n) return;
+
+  if (id === 'feed' && cur === 'splash') sfx.enter();
+  else if (id === 'create') sfx.create();
+  else if (id === 'collab') sfx.collab();
+  else sfx.nav();
+
+  c.classList.remove('active'); c.classList.add('out');
+  setTimeout(() => { c.classList.remove('out'); n.classList.add('active'); n.scrollTop = 0; }, 130);
+
+  document.getElementById('bnav').style.display = id === 'splash' ? 'none' : 'flex';
+  document.querySelectorAll('.bnav-item').forEach(i => i.classList.toggle('on', i.dataset.s === id));
+  cur = id;
+}
+
+// ─── INTERACTIONS ───
+function doLike(b) {
+  sfx.like();
+  b.classList.toggle('liked');
+  const i = b.querySelector('.pi');
+  i.textContent = b.classList.contains('liked') ? '♥' : '♡';
+  i.style.transform = 'scale(1.35)';
+  setTimeout(() => i.style.transform = '', 280);
+}
+
+function toggleC(h) {
+  sfx.craft();
+  h.classList.toggle('open');
+  h.nextElementSibling.classList.toggle('exp');
+}
+
+function pickCraft(el, type) {
+  sfx.tap();
+  document.querySelectorAll('.cr-opt').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel');
+
+  const uz = document.getElementById('crUpload');
+  const ch = document.getElementById('crChips');
+
+  const cfg = {
+    design: { cls: 'uz-design', icon: '🎨', lbl: 'Drop your design work', fmt: 'PNG, SVG, PSD, AI, PDF · Up to 50MB<br>Process video or timelapse optional', chips: ['Illustration','Typography','UI / UX','Motion','3D','Fine Art','Architecture','Fashion'] },
+    sound: { cls: 'uz-sound', icon: '🎵', lbl: 'Upload your sound', fmt: 'WAV, FLAC, MP3, MIDI, AIFF · Up to 100MB<br>Stems, scores & project files welcome', chips: ['Composition','Vocal','Ambient','Beats','Sound Design','DJ / Mix','Podcast','Classical'] },
+    lens: { cls: 'uz-lens', icon: '📷', lbl: 'Upload your visuals', fmt: 'RAW, JPEG, TIFF, MP4, MOV · Up to 80MB<br>Photo series & behind-the-scenes welcome', chips: ['Portrait','Street','Short Film','Documentary','Landscape','Drone','Music Video','Macro'] }
+  };
+
+  const c = cfg[type];
+  uz.className = 'cr-upload ' + c.cls;
+  uz.querySelector('.uz-icon').textContent = c.icon;
+  uz.querySelector('.uz-label').textContent = c.lbl;
+  uz.querySelector('.uz-formats').innerHTML = c.fmt;
+  ch.innerHTML = c.chips.map((x,i) => `<div class="cr-chip${i===0?' sel':''}" onclick="pickChip(this)">${x}</div>`).join('');
+}
+
+function pickChip(c) { sfx.tap(); document.querySelectorAll('.cr-chip').forEach(x => x.classList.remove('sel')); c.classList.add('sel'); }
+function playAmbient() { sfx.ambient(); }
+
+// ─── WAVEFORM ───
+(function(){
+  const w = document.getElementById('wf1'); if (!w) return;
+  for (let i = 0; i < 55; i++) {
+    const b = document.createElement('div');
+    b.className = 'wbar' + (i < 22 ? ' on' : '');
+    b.style.height = (6 + Math.random() * 36) + 'px';
+    w.appendChild(b);
+  }
+})();
+
+document.addEventListener('click', () => init(), { once: true });
+</script>
+</body>
+</html>
