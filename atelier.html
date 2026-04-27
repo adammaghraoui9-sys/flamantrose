@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Atelier — Design. Sound. Lens.</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sora:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --white:#FFF;--snow:#FAFAFA;--pearl:#F6F4F0;--beige:#EDE8E0;--beige-warm:#E5DDD2;--beige-deep:#D4C9BA;--sand:#C8BBAA;--taupe:#B0A494;--blush:#D4A0A0;--blush-soft:#E8C5C5;--blush-pale:#F5E8E8;--rose-accent:#C47D7D;--rose-muted:#B08888;--ink:#1A1714;--ink-soft:#2E2A25;--text:#3D3630;--text-mid:#6B6159;--text-light:#9A8F84;--text-faint:#BDB2A6;
+  --design:#C47D7D;--design-pale:#F5E8E8;--design-deep:#A36363;--sound:#7D9EC4;--sound-pale:#E8EFF5;--sound-deep:#5A7DA3;--lens:#A89464;--lens-pale:#F2EDE0;--lens-deep:#8A7750;
+  --radius-s:10px;--radius-m:14px;--radius-l:20px;--radius-pill:100px;--shadow-s:0 2px 12px rgba(26,23,20,0.04);--shadow-m:0 8px 30px rgba(26,23,20,0.06);--ease:cubic-bezier(0.22,1,0.36,1);--spring:cubic-bezier(0.34,1.56,0.64,1);
+}
+html,body{width:100%;height:100%;font-family:'Sora',sans-serif;background:#0f0e0d;color:var(--text);overflow:hidden;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+.device{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:390px;height:844px;background:var(--white);border-radius:44px;overflow:hidden;box-shadow:0 0 0 6px #1a1714,0 0 0 8px #2e2a25,0 50px 140px rgba(0,0,0,0.55);display:flex;flex-direction:column}
+.statusbar{height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 8px;font-size:0.7rem;font-weight:600;color:var(--ink);flex-shrink:0;z-index:60;background:var(--white)}
+.screens{flex:1;position:relative;overflow:hidden}
+.scr{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;opacity:0;transform:translateX(24px);transition:all 0.45s var(--ease);pointer-events:none;scrollbar-width:none}
+.scr::-webkit-scrollbar{display:none}
+.scr.active{opacity:1;transform:translateX(0);pointer-events:auto}
+.scr.out{opacity:0;transform:translateX(-24px)}
+.bnav{height:80px;display:flex;align-items:flex-start;justify-content:space-around;padding-top:8px;background:var(--white);border-top:1px solid var(--beige);flex-shrink:0;z-index:60}
+.bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.bnav-icon{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;transition:transform 0.3s var(--spring)}
+.bnav-label{font-size:0.52rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-light);transition:color 0.3s}
+.bnav-item.on .bnav-icon{transform:scale(1.12) translateY(-2px)}
+.bnav-item.on .bnav-label{color:var(--ink);font-weight:600}
+.bnav-item.create-nav .bnav-icon{width:42px;height:42px;background:var(--ink);border-radius:13px;color:var(--white);font-size:1.2rem;margin-top:-10px;box-shadow:0 4px 16px rgba(26,23,20,0.2)}
+.bnav-item.create-nav:active .bnav-icon{transform:scale(0.9);background:var(--rose-accent)}
+.snd-toggle{position:absolute;top:7px;right:56px;z-index:100;width:26px;height:26px;border-radius:50%;background:rgba(246,244,240,0.7);border:none;cursor:pointer;font-size:0.65rem;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
+
+/* MODAL */
+.modal-overlay{position:absolute;inset:0;background:rgba(26,23,20,0.4);z-index:70;opacity:0;pointer-events:none;transition:opacity 0.3s}
+.modal-overlay.vis{opacity:1;pointer-events:auto}
+.drawer{position:absolute;bottom:0;left:0;right:0;background:var(--white);border-radius:20px 20px 0 0;z-index:80;transform:translateY(100%);transition:transform 0.45s var(--ease);max-height:75%;overflow-y:auto;scrollbar-width:none}
+.drawer::-webkit-scrollbar{display:none}
+.drawer.vis{transform:translateY(0)}
+.drawer-handle{width:36px;height:4px;background:var(--beige-deep);border-radius:2px;margin:10px auto 0}
+.drawer-head{padding:1rem 1.4rem 0.6rem;display:flex;align-items:center;justify-content:space-between}
+.drawer-title{font-family:'DM Serif Display',serif;font-size:1.1rem}
+.drawer-close{background:none;border:none;font-size:0.8rem;color:var(--text-light);cursor:pointer;padding:4px 8px}
+.drawer-body{padding:0 1.4rem 1.5rem}
+.toast{position:absolute;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--ink);color:var(--white);padding:0.6rem 1.2rem;border-radius:var(--radius-pill);font-size:0.72rem;font-weight:500;z-index:90;opacity:0;transition:all 0.35s var(--ease);pointer-events:none;white-space:nowrap}
+.toast.vis{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* SPLASH */
+.splash{background:var(--white);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:3rem 2rem;position:relative;overflow:hidden}
+.splash-grain{position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none}
+.splash-line{width:1px;height:60px;background:linear-gradient(to bottom,transparent,var(--beige-deep),transparent);margin-bottom:2rem;animation:fi 1.2s var(--ease) 0.2s both}
+@keyframes fi{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.splash-mark{font-size:0.6rem;letter-spacing:0.45em;text-transform:uppercase;color:var(--text-light);margin-bottom:1.2rem;animation:fi 1s var(--ease) 0.4s both}
+.splash-name{font-family:'DM Serif Display',serif;font-weight:400;font-size:3.4rem;color:var(--ink);letter-spacing:0.02em;line-height:1;margin-bottom:0.5rem;animation:fi 1s var(--ease) 0.55s both}
+.splash-dot{color:var(--rose-accent)}
+.splash-sub{font-family:'Lora',serif;font-style:italic;font-size:0.95rem;color:var(--text-mid);margin-bottom:0.6rem;animation:fi 1s var(--ease) 0.7s both}
+.splash-crafts{display:flex;gap:1.6rem;margin:1.8rem 0 2.8rem;animation:fi 1s var(--ease) 0.85s both}
+.splash-craft{text-align:center;cursor:pointer}
+.splash-craft-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 0.5rem;border:1.5px solid var(--beige);transition:all 0.3s}
+.splash-craft-icon:active{transform:scale(0.92)}
+.sc-design{background:var(--design-pale);border-color:rgba(196,125,125,0.2)}.sc-sound{background:var(--sound-pale);border-color:rgba(125,158,196,0.2)}.sc-lens{background:var(--lens-pale);border-color:rgba(168,148,100,0.2)}
+.splash-craft-label{font-size:0.6rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-mid)}
+.splash-btns{display:flex;flex-direction:column;gap:0.7rem;width:100%;max-width:260px;animation:fi 1s var(--ease) 1s both}
+.btn{padding:0.85rem;border-radius:var(--radius-pill);font-family:'Sora',sans-serif;font-size:0.78rem;font-weight:500;letter-spacing:0.06em;cursor:pointer;transition:all 0.3s;border:none;text-align:center}
+.btn-dark{background:var(--ink);color:var(--white)}.btn-dark:active{background:var(--rose-accent);transform:scale(0.97)}
+.btn-light{background:transparent;color:var(--text-mid);border:1.5px solid var(--beige-deep)}.btn-light:active{border-color:var(--rose-accent)}
+.splash-bottom{position:absolute;bottom:2rem;display:flex;gap:1.5rem;font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-faint);animation:fi 1s var(--ease) 1.2s both}
+.splash-bottom span{position:relative}.splash-bottom span+span::before{content:'·';position:absolute;left:-0.9rem;color:var(--beige-deep)}
+
+/* FEED */
+.feed-top{padding:0.7rem 1.4rem 0.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:25;background:rgba(255,255,255,0.9);backdrop-filter:blur(20px)}
+.feed-brand{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--ink);cursor:pointer}.feed-brand .fd{color:var(--rose-accent)}
+.feed-right{display:flex;gap:0.6rem;align-items:center}
+.feed-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.95rem;cursor:pointer;position:relative}.feed-icon:active{background:var(--beige)}
+.feed-ndot{position:absolute;top:5px;right:6px;width:6px;height:6px;background:var(--rose-accent);border-radius:50%;border:1.5px solid var(--white);transition:opacity 0.3s}
+.feed-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--beige-warm),var(--sand));cursor:pointer}
+.cpills{display:flex;gap:0.4rem;padding:0.3rem 1.4rem 0.8rem;overflow-x:auto;scrollbar-width:none}.cpills::-webkit-scrollbar{display:none}
+.cpill{padding:0.4rem 0.9rem;border-radius:var(--radius-pill);font-size:0.65rem;font-weight:500;white-space:nowrap;cursor:pointer;transition:all 0.25s;flex-shrink:0;border:1.5px solid transparent}
+.cpill:active{transform:scale(0.95)}
+.cpill.c-on{background:var(--ink);color:var(--white)}.cpill.c-off{background:var(--pearl);color:var(--text-light)}
+.posts{padding-bottom:1rem}
+.post{padding:1rem 1.4rem;border-bottom:1px solid var(--beige);animation:pi 0.5s var(--ease) both}
+@keyframes pi{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.post:nth-child(2){animation-delay:0.08s}.post:nth-child(3){animation-delay:0.16s}.post:nth-child(4){animation-delay:0.24s}
+.post.hid{display:none}
+.post-head{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.7rem}
+.pav{width:36px;height:36px;border-radius:50%;flex-shrink:0;position:relative;cursor:pointer}
+.pav::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid transparent}
+.pav.rd::after{border-color:var(--design)}.pav.rs::after{border-color:var(--sound)}.pav.rl::after{border-color:var(--lens)}
+.pc{width:100%;height:100%;border-radius:50%}
+.pv1{background:linear-gradient(135deg,var(--blush),var(--rose-accent))}.pv2{background:linear-gradient(135deg,var(--sound),var(--sound-deep))}.pv3{background:linear-gradient(135deg,var(--lens),var(--lens-deep))}.pv4{background:linear-gradient(135deg,var(--beige-warm),var(--sand))}.pv5{background:linear-gradient(135deg,var(--design),var(--sound))}
+.pinfo{flex:1}.pname{font-weight:600;font-size:0.78rem;color:var(--ink)}
+.pmeta{font-size:0.6rem;color:var(--text-light);display:flex;align-items:center;gap:0.35rem}
+.gtag{display:inline-flex;padding:0.1rem 0.4rem;border-radius:var(--radius-pill);font-size:0.5rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase}
+.gt-d{background:var(--design-pale);color:var(--design-deep)}.gt-s{background:var(--sound-pale);color:var(--sound-deep)}.gt-l{background:var(--lens-pale);color:var(--lens-deep)}
+.pmenu{background:none;border:none;font-size:1rem;color:var(--text-faint);cursor:pointer;margin-left:auto;padding:4px}
+.cbadge{display:inline-flex;align-items:center;gap:0.25rem;background:var(--pearl);padding:0.2rem 0.55rem;border-radius:var(--radius-pill);font-size:0.55rem;color:var(--text-mid);margin-bottom:0.5rem;font-weight:500;border:1px solid var(--beige)}
+.pmedia{width:100%;border-radius:var(--radius-m);overflow:hidden;margin-bottom:0.6rem;cursor:pointer}
+.m-vis{width:100%;height:240px}
+.m-aud{background:var(--pearl);padding:1.1rem;display:flex;flex-direction:column;gap:0.7rem;border:1px solid var(--beige)}
+.wf{display:flex;align-items:center;gap:1.5px;height:44px}
+.wb{flex:1;background:var(--sound);border-radius:1.5px;opacity:0.35;transition:opacity 0.15s}.wb.on{opacity:0.85}
+.actrls{display:flex;align-items:center;gap:0.7rem}
+.pbtn{width:34px;height:34px;border-radius:50%;background:var(--sound-deep);color:white;display:flex;align-items:center;justify-content:center;font-size:0.75rem;cursor:pointer;border:none;flex-shrink:0;transition:transform 0.2s var(--spring)}.pbtn:active{transform:scale(0.88)}.pbtn.playing{background:var(--rose-accent)}
+.ainf{flex:1}.atit{font-family:'DM Serif Display',serif;font-size:0.85rem;color:var(--ink)}.adur{font-size:0.58rem;color:var(--sound-deep)}
+.m-txt{background:var(--pearl);padding:1.6rem 1.3rem;border:1px solid var(--beige);cursor:pointer}
+.lt{font-family:'Lora',serif;font-size:0.88rem;line-height:1.9;color:var(--ink-soft);font-style:italic}
+.lf{font-family:'Sora',sans-serif;font-style:normal;font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-light);margin-top:0.8rem}
+.pacts{display:flex;align-items:center;gap:1rem;padding-top:0.2rem}
+.pa{display:flex;align-items:center;gap:0.25rem;font-size:0.68rem;color:var(--text-light);cursor:pointer;background:none;border:none;font-family:inherit;transition:all 0.2s}
+.pa:active{transform:scale(0.92)}.pa .pi{font-size:0.95rem;transition:transform 0.3s var(--spring)}
+.pa.liked .pi{color:var(--rose-accent);transform:scale(1.2)}.pa.liked{color:var(--rose-accent)}.pa.saved{color:var(--lens)}
+.pcap{margin-top:0.4rem;font-size:0.76rem;line-height:1.5;color:var(--text)}.pcap b{font-weight:600;color:var(--ink)}
+
+/* Notif */
+.ni{display:flex;align-items:flex-start;gap:0.7rem;padding:0.8rem 0;border-bottom:1px solid var(--beige)}
+.ni-unread{background:var(--blush-pale);border-radius:var(--radius-m);margin:0 -0.5rem;padding:0.8rem 0.5rem}
+.ni-av{width:34px;height:34px;border-radius:50%;flex-shrink:0}
+.ni-t{flex:1;font-size:0.75rem;line-height:1.5;color:var(--text)}.ni-t b{font-weight:600;color:var(--ink)}
+.ni-time{font-size:0.58rem;color:var(--text-faint);margin-top:0.15rem}
+
+/* Comments */
+.cmt{display:flex;gap:0.6rem;padding:0.7rem 0}.cmt-av{width:28px;height:28px;border-radius:50%;flex-shrink:0}
+.cmt-b{flex:1}.cmt-n{font-size:0.7rem;font-weight:600;color:var(--ink)}.cmt-t{font-size:0.72rem;color:var(--text);line-height:1.4;margin-top:0.1rem}
+.cmt-m{font-size:0.55rem;color:var(--text-faint);margin-top:0.2rem;display:flex;gap:0.8rem}.cmt-m span{cursor:pointer}
+.cmt-iw{display:flex;gap:0.5rem;align-items:center;padding-top:0.8rem;border-top:1px solid var(--beige);margin-top:0.5rem}
+.cmt-i{flex:1;border:1px solid var(--beige);background:var(--pearl);border-radius:var(--radius-pill);padding:0.5rem 0.8rem;font-size:0.72rem;font-family:inherit;outline:none}
+.cmt-i:focus{border-color:var(--blush-soft)}
+.cmt-s{background:var(--ink);color:var(--white);border:none;border-radius:50%;width:30px;height:30px;font-size:0.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cmt-s:active{background:var(--rose-accent)}
+
+/* Invite */
+.inv-s{width:100%;border:1px solid var(--beige);background:var(--pearl);border-radius:var(--radius-pill);padding:0.6rem 1rem;font-size:0.75rem;font-family:inherit;outline:none;margin-bottom:0.8rem}.inv-s:focus{border-color:var(--blush-soft)}
+.inv-u{display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0;border-bottom:1px solid var(--beige)}
+.inv-info{flex:1}.inv-name{font-size:0.75rem;font-weight:600;color:var(--ink)}.inv-craft{font-size:0.58rem;color:var(--text-light)}
+.inv-btn{padding:0.35rem 0.8rem;border-radius:var(--radius-pill);font-size:0.62rem;font-weight:500;border:1.5px solid var(--beige-deep);background:none;color:var(--text);cursor:pointer;font-family:inherit;transition:all 0.2s}
+.inv-btn.done{background:var(--ink);color:var(--white);border-color:var(--ink)}
+
+/* Menu */
+.mi{display:flex;align-items:center;gap:0.7rem;padding:0.75rem 0;border-bottom:1px solid var(--beige);cursor:pointer;font-size:0.78rem;color:var(--text)}.mi:active{color:var(--rose-accent)}.mi:last-child{border:none;color:var(--rose-accent)}.mi-i{font-size:1rem;width:24px;text-align:center}
+
+/* Apply */
+.ap-ta{width:100%;border:1px solid var(--beige);background:var(--pearl);border-radius:var(--radius-m);padding:0.8rem;font-size:0.78rem;font-family:'Lora',serif;font-style:italic;outline:none;resize:none;min-height:80px;line-height:1.5;color:var(--ink);margin-bottom:0.8rem}.ap-ta:focus{border-color:var(--blush-soft)}
+.ap-tags{display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:1rem}
+.ap-tag{padding:0.3rem 0.6rem;border-radius:var(--radius-pill);font-size:0.6rem;font-weight:500;cursor:pointer;border:1.5px solid var(--beige);background:var(--white);color:var(--text);transition:all 0.2s}.ap-tag.sel{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.ap-sub{width:100%;padding:0.8rem;border-radius:var(--radius-pill);background:var(--ink);color:var(--white);font-family:inherit;font-size:0.78rem;font-weight:500;border:none;cursor:pointer}.ap-sub:active{background:var(--rose-accent);transform:scale(0.98)}
+
+/* Crafts */
+.ct-top{padding:1.2rem 1.4rem 0.8rem;position:sticky;top:0;z-index:25;background:rgba(255,255,255,0.9);backdrop-filter:blur(20px)}
+.ct-top h2{font-family:'DM Serif Display',serif;font-weight:400;font-size:1.5rem;color:var(--ink)}
+.ct-top p{font-size:0.72rem;color:var(--text-light);margin-top:0.15rem;font-family:'Lora',serif;font-style:italic}
+.cb{padding:0.8rem 1.4rem}
+.ch{display:flex;align-items:center;gap:0.65rem;cursor:pointer;padding:0.5rem 0}
+.ci{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.ci-d{background:var(--design-pale)}.ci-s{background:var(--sound-pale)}.ci-l{background:var(--lens-pale)}
+.cn{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--ink)}
+.cs{font-size:0.58rem;color:var(--text-light);margin-top:0.05rem}
+.ca{margin-left:auto;font-size:0.75rem;color:var(--text-faint);transition:transform 0.3s var(--ease)}
+.ch.open .ca{transform:rotate(90deg)}
+.subs{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;max-height:0;overflow:hidden;opacity:0;transition:max-height 0.5s var(--ease),opacity 0.3s}.subs.exp{max-height:800px;opacity:1;padding-bottom:0.5rem}
+.sc{border-radius:var(--radius-m);padding:0.9rem;cursor:pointer;transition:all 0.25s;border:1px solid transparent}.sc:active{transform:scale(0.97)}
+.sc.sd{background:linear-gradient(150deg,var(--design-pale),rgba(196,125,125,0.04));border-color:rgba(196,125,125,0.08)}
+.sc.ss{background:linear-gradient(150deg,var(--sound-pale),rgba(125,158,196,0.04));border-color:rgba(125,158,196,0.08)}
+.sc.sl{background:linear-gradient(150deg,var(--lens-pale),rgba(168,148,100,0.04));border-color:rgba(168,148,100,0.08)}
+.se{font-size:1.4rem;margin-bottom:0.4rem}.sn{font-family:'DM Serif Display',serif;font-size:0.8rem;color:var(--ink);margin-bottom:0.1rem}
+.su{font-size:0.52rem;color:var(--text-light)}
+
+/* Create */
+.crt-top{padding:0.8rem 1.4rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:25;background:rgba(255,255,255,0.9);backdrop-filter:blur(20px)}
+.crt-back{font-size:0.75rem;color:var(--text-light);cursor:pointer;background:none;border:none;font-family:inherit}
+.crt-t{font-family:'DM Serif Display',serif;font-size:1.05rem}
+.crt-share{padding:0.35rem 1rem;border-radius:var(--radius-pill);background:var(--ink);color:var(--white);font-size:0.68rem;font-weight:500;border:none;cursor:pointer;font-family:inherit}.crt-share:active{background:var(--rose-accent);transform:scale(0.96)}
+.crt-body{padding:0.8rem 1.4rem}
+.crt-label{font-size:0.55rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--text-faint);margin-bottom:0.7rem;font-weight:500}
+.crt-crafts{display:flex;gap:0.5rem;margin-bottom:1.3rem}
+.co{flex:1;padding:0.9rem 0.4rem;border-radius:var(--radius-m);text-align:center;cursor:pointer;transition:all 0.25s;border:2px solid transparent}.co:active{transform:scale(0.96)}
+.co-i{font-size:1.6rem;margin-bottom:0.3rem}.co-l{font-family:'DM Serif Display',serif;font-size:0.75rem}
+.co.od{background:var(--design-pale)}.co.os{background:var(--sound-pale)}.co.ol{background:var(--lens-pale)}
+.co.sel{border-color:var(--ink);box-shadow:var(--shadow-s)}
+.crt-chips{display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:1.3rem}
+.cc{padding:0.35rem 0.7rem;border-radius:var(--radius-pill);font-size:0.63rem;font-weight:500;cursor:pointer;transition:all 0.2s;border:1.5px solid var(--beige);background:var(--white);color:var(--text)}.cc:active{transform:scale(0.95)}.cc.sel{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.crt-uz{border-radius:var(--radius-l);padding:1.8rem;text-align:center;cursor:pointer;transition:all 0.25s;margin-bottom:1.3rem;border:1.5px dashed var(--beige-deep)}.crt-uz:active{transform:scale(0.98)}
+.crt-uz.uzd{background:linear-gradient(150deg,var(--design-pale),var(--white));border-color:rgba(196,125,125,0.25)}
+.crt-uz.uzs{background:linear-gradient(150deg,var(--sound-pale),var(--white));border-color:rgba(125,158,196,0.25)}
+.crt-uz.uzl{background:linear-gradient(150deg,var(--lens-pale),var(--white));border-color:rgba(168,148,100,0.25)}
+.crt-uz.has{border-style:solid}
+.uzi{font-size:2.2rem;margin-bottom:0.5rem}.uzlb{font-family:'DM Serif Display',serif;font-size:0.92rem;margin-bottom:0.25rem}.uzf{font-size:0.6rem;color:var(--text-light);line-height:1.5}
+.crt-ta{width:100%;border:1px solid var(--beige);background:var(--pearl);border-radius:var(--radius-m);padding:0.9rem;font-family:'Lora',serif;font-size:0.82rem;line-height:1.6;color:var(--ink);resize:none;min-height:72px;outline:none}.crt-ta:focus{box-shadow:0 0 0 2px var(--blush-soft)}.crt-ta::placeholder{color:var(--text-faint);font-style:italic}
+.crt-cz{border-radius:var(--radius-m);padding:1rem;text-align:center;cursor:pointer;background:var(--pearl);border:1px solid var(--beige);margin-top:1.3rem}.crt-cz:active{background:var(--beige)}
+
+/* Collab */
+.col-top{padding:1rem 1.4rem 0;position:sticky;top:0;z-index:25;background:rgba(255,255,255,0.9);backdrop-filter:blur(20px)}
+.col-top h2{font-family:'DM Serif Display',serif;font-weight:400;font-size:1.4rem}
+.col-tabs{display:flex;margin-top:0.7rem;border-bottom:1px solid var(--beige)}
+.col-tab{flex:1;text-align:center;padding:0.55rem 0;font-size:0.65rem;font-weight:500;color:var(--text-light);cursor:pointer;position:relative;transition:color 0.2s}
+.col-tab.on{color:var(--ink)}.col-tab.on::after{content:'';position:absolute;bottom:-1px;left:22%;right:22%;height:1.5px;background:var(--ink);border-radius:1px}
+.col-body{padding:0.8rem 1.4rem}
+.col-pan{display:none}.col-pan.vis{display:block}
+.pj{background:var(--pearl);border-radius:var(--radius-l);padding:1.1rem;margin-bottom:0.7rem;cursor:pointer;border:1px solid var(--beige);transition:all 0.25s}.pj:active{transform:scale(0.98)}
+.pj-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem}
+.pj-au{display:flex;align-items:center;gap:0.4rem}.pj-av{width:26px;height:26px;border-radius:50%}.pj-an{font-size:0.68rem;font-weight:500}
+.pj-st{font-size:0.5rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;padding:0.18rem 0.5rem;border-radius:var(--radius-pill)}
+.pso{background:rgba(125,184,143,0.12);color:#5a9e6e}.psa{background:var(--sound-pale);color:var(--sound-deep)}.psk{background:var(--design-pale);color:var(--design-deep)}
+.pj-ti{font-family:'DM Serif Display',serif;font-size:0.98rem;margin-bottom:0.25rem;color:var(--ink)}
+.pj-de{font-size:0.7rem;color:var(--text-light);line-height:1.5;margin-bottom:0.7rem}
+.pj-tg{display:flex;gap:0.25rem;flex-wrap:wrap;margin-bottom:0.7rem}
+.pj-tag{font-size:0.52rem;padding:0.15rem 0.45rem;border-radius:var(--radius-pill);font-weight:500}
+.pj-ft{display:flex;align-items:center;justify-content:space-between}
+.pj-mb{display:flex;align-items:center;gap:0.3rem}.ms{display:flex}
+.ma{width:22px;height:22px;border-radius:50%;border:2px solid var(--pearl);margin-right:-7px}
+.mc{font-size:0.58rem;color:var(--text-light);margin-left:0.2rem}
+.pj-ap{font-size:0.64rem;font-weight:600;color:var(--rose-accent);cursor:pointer;background:none;border:none;font-family:inherit}.pj-ap:active{color:var(--ink)}
+.emp{text-align:center;padding:3rem 1rem}.emp-i{font-size:2.5rem;margin-bottom:0.8rem;opacity:0.3}.emp-t{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--text-mid);margin-bottom:0.3rem}.emp-d{font-size:0.72rem;color:var(--text-light);line-height:1.5;margin-bottom:1rem}
+.emp-b{display:inline-block;padding:0.6rem 1.4rem;border-radius:var(--radius-pill);background:var(--ink);color:var(--white);font-size:0.7rem;font-weight:500;cursor:pointer;border:none;font-family:inherit}
+
+/* Profile */
+.pf-cv{height:130px;background:linear-gradient(135deg,var(--pearl),var(--beige),var(--beige-warm));position:relative}
+.pf-aw{position:absolute;bottom:-30px;left:1.4rem}
+.pf-av{width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,var(--beige-warm),var(--sand));border:3px solid var(--white);display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:var(--shadow-m)}
+.pf-body{padding:2.5rem 1.4rem 0.8rem}
+.pf-name{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--ink);margin-bottom:0.08rem}
+.pf-handle{font-size:0.68rem;color:var(--text-faint);margin-bottom:0.5rem}
+.pf-tags{display:flex;gap:0.25rem;flex-wrap:wrap;margin-bottom:0.6rem}
+.pf-bio{font-size:0.78rem;color:var(--text-mid);line-height:1.6;font-family:'Lora',serif;font-style:italic;margin-bottom:0.9rem}
+.pf-stats{display:flex;gap:1.3rem;margin-bottom:1rem}
+.pf-si{text-align:center}.pf-sn{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--ink)}.pf-sl{font-size:0.52rem;color:var(--text-faint);letter-spacing:0.08em;text-transform:uppercase}
+.pf-btns{display:flex;gap:0.5rem;margin-bottom:1.2rem}
+.pf-btn{flex:1;padding:0.55rem;border-radius:var(--radius-pill);font-size:0.68rem;font-weight:500;text-align:center;cursor:pointer;font-family:inherit;border:none;transition:all 0.2s}
+.pf-ed{background:var(--pearl);color:var(--ink);border:1.5px solid var(--beige)}.pf-sh{background:var(--ink);color:var(--white)}
+.pf-gtabs{display:flex;border-bottom:1px solid var(--beige);margin-bottom:0.8rem}
+.pf-gt{flex:1;text-align:center;padding:0.5rem;font-size:0.62rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-light);cursor:pointer;position:relative;transition:color 0.2s}
+.pf-gt.on{color:var(--ink)}.pf-gt.on::after{content:'';position:absolute;bottom:-1px;left:28%;right:28%;height:1.5px;background:var(--ink);border-radius:1px}
+.pf-pan{display:none}.pf-pan.vis{display:block}
+.pf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.gc{aspect-ratio:1;border-radius:3px;overflow:hidden;cursor:pointer;position:relative}.gc:active{opacity:0.85}
+.gc .gb{width:100%;height:100%}
+.g1{background:linear-gradient(135deg,var(--beige-warm),var(--sand))}.g2{background:linear-gradient(135deg,var(--blush-soft),var(--blush))}.g3{background:linear-gradient(140deg,var(--sound),var(--sound-pale))}.g4{background:linear-gradient(135deg,var(--lens-pale),var(--lens))}.g5{background:linear-gradient(150deg,var(--beige),var(--pearl))}.g6{background:linear-gradient(135deg,var(--design-pale),var(--blush-soft))}
+.gc-b{position:absolute;bottom:4px;left:4px;padding:0.1rem 0.3rem;border-radius:3px;font-size:0.4rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;background:rgba(0,0,0,0.5);color:white}
+.pf-about{padding:0.5rem 0;font-size:0.78rem;line-height:1.7;color:var(--text-mid)}
+.pf-as{margin-bottom:1rem}.pf-al{font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-faint);margin-bottom:0.3rem;font-weight:500}
+
+/* Edit */
+.ed-f{margin-bottom:1rem}.ed-l{font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-faint);margin-bottom:0.3rem;font-weight:500}
+.ed-i{width:100%;border:1px solid var(--beige);background:var(--pearl);border-radius:var(--radius-m);padding:0.6rem 0.8rem;font-size:0.78rem;font-family:inherit;outline:none;color:var(--ink)}.ed-i:focus{border-color:var(--blush-soft)}
+.ed-save{width:100%;padding:0.75rem;border-radius:var(--radius-pill);background:var(--ink);color:var(--white);font-size:0.75rem;font-weight:500;border:none;cursor:pointer;font-family:inherit;margin-top:0.5rem}.ed-save:active{background:var(--rose-accent)}
+
+@media(max-height:700px){.device{height:95vh;width:calc(95vh*0.462)}}
+@media(max-width:420px){.device{width:100vw;height:100vh;border-radius:0;box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="device">
+<div class="statusbar"><span>9:41</span><span class="sb-icons">📶 📡 🔋</span></div>
+<button class="snd-toggle" id="sndBtn">🔊</button>
+<div class="modal-overlay" id="ov" onclick="cld()"></div>
+<div class="toast" id="tst"></div>
+
+<!-- DRAWERS -->
+<div class="drawer" id="d-notif"><div class="drawer-handle"></div><div class="drawer-head"><div class="drawer-title">Notifications</div><button class="drawer-close" onclick="cld()">✕</button></div><div class="drawer-body">
+<div class="ni ni-unread"><div class="ni-av pv1"></div><div><div class="ni-t"><b>Luna Mercer</b> invited you to collaborate on <b>"Duality in Bloom"</b></div><div class="ni-time">2m ago</div></div></div>
+<div class="ni ni-unread"><div class="ni-av pv2"></div><div><div class="ni-t"><b>Amir Hassen</b> liked your recent design post</div><div class="ni-time">15m ago</div></div></div>
+<div class="ni"><div class="ni-av pv3"></div><div><div class="ni-t"><b>Mira Okafor</b> commented: "This light work is incredible"</div><div class="ni-time">1h ago</div></div></div>
+<div class="ni"><div class="ni-av pv5"></div><div><div class="ni-t"><b>Kai Fontaine</b> applied to your project <b>"Bloom"</b></div><div class="ni-time">3h ago</div></div></div>
+<div class="ni"><div class="ni-av pv4"></div><div><div class="ni-t"><b>Elena Rossi</b> started following you</div><div class="ni-time">5h ago</div></div></div>
+</div></div>
+
+<div class="drawer" id="d-comments"><div class="drawer-handle"></div><div class="drawer-head"><div class="drawer-title">Comments</div><button class="drawer-close" onclick="cld()">✕</button></div><div class="drawer-body">
+<div class="cmt"><div class="cmt-av pv3"></div><div class="cmt-b"><div class="cmt-n">Mira Okafor</div><div class="cmt-t">The way these tones blend is absolutely beautiful. Would love to collaborate on something similar.</div><div class="cmt-m"><span>2h</span><span>♡ 12</span><span>Reply</span></div></div></div>
+<div class="cmt"><div class="cmt-av pv2"></div><div class="cmt-b"><div class="cmt-n">Amir Hassen</div><div class="cmt-t">This reminds me of the color work we discussed. Stunning execution.</div><div class="cmt-m"><span>3h</span><span>♡ 8</span><span>Reply</span></div></div></div>
+<div class="cmt"><div class="cmt-av pv5"></div><div class="cmt-b"><div class="cmt-n">Kai Fontaine</div><div class="cmt-t">✦ pure artistry</div><div class="cmt-m"><span>4h</span><span>♡ 5</span><span>Reply</span></div></div></div>
+<div class="cmt-iw"><input class="cmt-i" placeholder="Add a comment..." id="cmtInput"><button class="cmt-s" onclick="postCmt()">↑</button></div>
+</div></div>
+
+<div class="drawer" id="d-invite"><div class="drawer-handle"></div><div class="drawer-head"><div class="drawer-title">Invite to Collaborate</div><button class="drawer-close" onclick="cld()">✕</button></div><div class="drawer-body">
+<input class="inv-s" placeholder="Search artists..." oninput="filterInv(this.value)">
+<div id="invList">
+<div class="inv-u" data-n="luna mercer"><div class="pc pv1" style="width:32px;height:32px;border-radius:50%"></div><div class="inv-info"><div class="inv-name">Luna Mercer</div><div class="inv-craft">Design · Illustration</div></div><button class="inv-btn" onclick="togInv(this)">Invite</button></div>
+<div class="inv-u" data-n="amir hassen"><div class="pc pv2" style="width:32px;height:32px;border-radius:50%"></div><div class="inv-info"><div class="inv-name">Amir Hassen</div><div class="inv-craft">Sound · Ambient</div></div><button class="inv-btn" onclick="togInv(this)">Invite</button></div>
+<div class="inv-u" data-n="mira okafor"><div class="pc pv3" style="width:32px;height:32px;border-radius:50%"></div><div class="inv-info"><div class="inv-name">Mira Okafor</div><div class="inv-craft">Lens · Street</div></div><button class="inv-btn" onclick="togInv(this)">Invite</button></div>
+<div class="inv-u" data-n="kai fontaine"><div class="pc pv5" style="width:32px;height:32px;border-radius:50%"></div><div class="inv-info"><div class="inv-name">Kai Fontaine</div><div class="inv-craft">Lens · Film</div></div><button class="inv-btn" onclick="togInv(this)">Invite</button></div>
+<div class="inv-u" data-n="elena rossi"><div class="pc pv4" style="width:32px;height:32px;border-radius:50%"></div><div class="inv-info"><div class="inv-name">Elena Rossi</div><div class="inv-craft">Design · Typography</div></div><button class="inv-btn" onclick="togInv(this)">Invite</button></div>
+</div></div></div>
+
+<div class="drawer" id="d-menu"><div class="drawer-handle"></div><div class="drawer-body" style="padding-top:1rem">
+<div class="mi" onclick="cld();toast('Link copied!')"><div class="mi-i">🔗</div>Copy link</div>
+<div class="mi" onclick="cld();toast('Post shared!')"><div class="mi-i">↗</div>Share to...</div>
+<div class="mi" onclick="cld();toast('Post saved!')"><div class="mi-i">⊹</div>Save post</div>
+<div class="mi" onclick="cld();toast('Following artist!')"><div class="mi-i">+</div>Follow artist</div>
+<div class="mi" onclick="cld();toast('Post hidden')"><div class="mi-i">✕</div>Not interested</div>
+<div class="mi" onclick="cld()"><div class="mi-i">⚑</div>Report</div>
+</div></div>
+
+<div class="drawer" id="d-apply"><div class="drawer-handle"></div><div class="drawer-head"><div class="drawer-title" id="apT">Apply</div><button class="drawer-close" onclick="cld()">✕</button></div><div class="drawer-body">
+<div class="crt-label">Your craft</div>
+<div class="ap-tags"><div class="ap-tag sel" onclick="togTag(this)">Design</div><div class="ap-tag" onclick="togTag(this)">Sound</div><div class="ap-tag" onclick="togTag(this)">Lens</div></div>
+<div class="crt-label">Why you'd be great</div>
+<textarea class="ap-ta" placeholder="Tell them about your vision..."></textarea>
+<button class="ap-sub" onclick="sfx.success();cld();toast('✦ Application sent!')">Send Application</button>
+</div></div>
+
+<div class="drawer" id="d-edit"><div class="drawer-handle"></div><div class="drawer-head"><div class="drawer-title">Edit Profile</div><button class="drawer-close" onclick="cld()">✕</button></div><div class="drawer-body">
+<div class="ed-f"><div class="ed-l">Display Name</div><input class="ed-i" id="edN" value="You"></div>
+<div class="ed-f"><div class="ed-l">Username</div><input class="ed-i" id="edH" value="@yourusername"></div>
+<div class="ed-f"><div class="ed-l">Bio</div><textarea class="ed-i" id="edB" style="min-height:60px;resize:none;font-family:'Lora',serif;font-style:italic">Creating at the intersection of design and light.</textarea></div>
+<button class="ed-save" onclick="savProf()">Save Changes</button>
+</div></div>
+
+<div class="drawer" id="d-detail" style="max-height:85%"><div class="drawer-handle"></div><div class="drawer-head"><div class="drawer-title">Post</div><button class="drawer-close" onclick="cld()">✕</button></div><div class="drawer-body" id="detB"></div></div>
+
+<div class="screens">
+<!-- SPLASH -->
+<div class="scr active" id="s-splash"><div class="splash"><div class="splash-grain"></div><div class="splash-line"></div><div class="splash-mark">The Creative Platform</div><div class="splash-name">Atelier<span class="splash-dot">.</span></div><div class="splash-sub">Where artists build together</div>
+<div class="splash-crafts">
+<div class="splash-craft" onclick="go('feed');setTimeout(()=>filt('design'),300)"><div class="splash-craft-icon sc-design">🎨</div><div class="splash-craft-label">Design</div></div>
+<div class="splash-craft" onclick="go('feed');setTimeout(()=>filt('sound'),300)"><div class="splash-craft-icon sc-sound">🎵</div><div class="splash-craft-label">Sound</div></div>
+<div class="splash-craft" onclick="go('feed');setTimeout(()=>filt('lens'),300)"><div class="splash-craft-icon sc-lens">📷</div><div class="splash-craft-label">Lens</div></div>
+</div>
+<div class="splash-btns"><button class="btn btn-dark" onclick="go('feed')">Enter Atelier</button><button class="btn btn-light" onclick="go('feed')">I have an account</button></div>
+<div class="splash-bottom"><span>Design</span><span>Sound</span><span>Lens</span></div></div></div>
+
+<!-- FEED -->
+<div class="scr" id="s-feed">
+<div class="feed-top"><div class="feed-brand" onclick="document.getElementById('s-feed').scrollTo({top:0,behavior:'smooth'})">Atelier<span class="fd">.</span></div><div class="feed-right"><div class="feed-icon" onclick="opd('notif');document.getElementById('ndot').style.display='none'">🔔<div class="feed-ndot" id="ndot"></div></div><div class="feed-av" onclick="go('profile')"></div></div></div>
+<div class="cpills">
+<div class="cpill c-on" onclick="filt('all')" data-f="all">All</div>
+<div class="cpill cdesign c-off" onclick="filt('design')" data-f="design">🎨 Design</div>
+<div class="cpill csound c-off" onclick="filt('sound')" data-f="sound">🎵 Sound</div>
+<div class="cpill clens c-off" onclick="filt('lens')" data-f="lens">📷 Lens</div>
+</div>
+<div class="posts" id="fp">
+<div class="post" data-craft="design"><div class="post-head"><div class="pav rd" onclick="go('profile')"><div class="pc pv1"></div></div><div class="pinfo"><div class="pname">Luna Mercer</div><div class="pmeta"><span class="gtag gt-d">Illustration</span> · 2h</div></div><button class="pmenu" onclick="opd('menu')">⋯</button></div><div class="cbadge">✦ Collab with Kai Fontaine</div><div class="pmedia" onclick="opDet('Luna Mercer','Illustration','Duality in bloom — mixed illustration exploring memory and imagination ✦')"><div class="m-vis" style="background:linear-gradient(135deg,#E5DDD2 0%,#D4A0A0 25%,#C8BBAA 50%,#7D9EC4 80%,#F6F4F0 100%);height:250px"></div></div><div class="pacts"><button class="pa liked" onclick="doL(this)"><span class="pi">♥</span> <span class="lc">247</span></button><button class="pa" onclick="opd('comments')"><span class="pi">💬</span> 32</button><button class="pa" onclick="opd('invite')"><span class="pi">✦</span> Collab</button><button class="pa" style="margin-left:auto" onclick="doS(this)"><span class="pi">⊹</span></button></div><div class="pcap"><b>Luna Mercer</b> Duality in bloom — mixed illustration exploring the space between memory and imagination ✦</div></div>
+
+<div class="post" data-craft="sound"><div class="post-head"><div class="pav rs"><div class="pc pv2"></div></div><div class="pinfo"><div class="pname">Amir Hassen</div><div class="pmeta"><span class="gtag gt-s">Ambient</span> · 4h</div></div><button class="pmenu" onclick="opd('menu')">⋯</button></div><div class="pmedia"><div class="m-aud"><div class="actrls"><button class="pbtn" onclick="togPlay(this)">▶</button><div class="ainf"><div class="atit">Nocturne in Soft Rain</div><div class="adur">3:42 · Ambient / Field Recording</div></div></div><div class="wf" id="wf1"></div></div></div><div class="pacts"><button class="pa" onclick="doL(this)"><span class="pi">♡</span> <span class="lc">183</span></button><button class="pa" onclick="opd('comments')"><span class="pi">💬</span> 18</button><button class="pa" onclick="opd('invite')"><span class="pi">✦</span> Collab</button><button class="pa" style="margin-left:auto" onclick="doS(this)"><span class="pi">⊹</span></button></div><div class="pcap"><b>Amir Hassen</b> Recorded during a midnight walk through the medina.</div></div>
+
+<div class="post" data-craft="lens"><div class="post-head"><div class="pav rl"><div class="pc pv3"></div></div><div class="pinfo"><div class="pname">Mira Okafor</div><div class="pmeta"><span class="gtag gt-l">Street</span> · 6h</div></div><button class="pmenu" onclick="opd('menu')">⋯</button></div><div class="pmedia" onclick="opDet('Mira Okafor','Street Photography','Light studies, Marrakech.')"><div class="m-vis" style="background:linear-gradient(165deg,#1A1714 0%,#6B6159 35%,#C8BBAA 65%,#EDE8E0 90%,#FAFAFA 100%);height:230px"></div></div><div class="pacts"><button class="pa" onclick="doL(this)"><span class="pi">♡</span> <span class="lc">312</span></button><button class="pa" onclick="opd('comments')"><span class="pi">💬</span> 47</button><button class="pa" onclick="opd('invite')"><span class="pi">✦</span> Collab</button><button class="pa" style="margin-left:auto" onclick="doS(this)"><span class="pi">⊹</span></button></div><div class="pcap"><b>Mira Okafor</b> Light studies, Marrakech. The way shadow carves architecture.</div></div>
+
+<div class="post" data-craft="design"><div class="post-head"><div class="pav rd"><div class="pc pv4"></div></div><div class="pinfo"><div class="pname">Elena Rossi</div><div class="pmeta"><span class="gtag gt-d">Typography</span> · 9h</div></div><button class="pmenu" onclick="opd('menu')">⋯</button></div><div class="pmedia" onclick="opDet('Elena Rossi','Typography','Typographic poster × poetry')"><div class="m-txt"><div class="lt">I fold myself into<br>the quiet of unfinished things —<br>half-drawn faces,<br>songs without endings,<br>letters sent to no one.<br><br>Even unfinished,<br>they breathe.</div><div class="lf">Typographic Poster · Poetry × Design</div></div></div><div class="pacts"><button class="pa" onclick="doL(this)"><span class="pi">♡</span> <span class="lc">198</span></button><button class="pa" onclick="opd('comments')"><span class="pi">💬</span> 24</button><button class="pa" onclick="opd('invite')"><span class="pi">✦</span> Collab</button><button class="pa" style="margin-left:auto" onclick="doS(this)"><span class="pi">⊹</span></button></div><div class="pcap"><b>Elena Rossi</b> From my new type poster series. Looking for a sound artist to score a reading ✦</div></div>
+</div></div>
+
+<!-- CRAFTS -->
+<div class="scr" id="s-crafts"><div class="ct-top"><h2>The Three Crafts</h2><p>Every art finds its home</p></div>
+<div class="cb"><div class="ch open" onclick="togC(this)"><div class="ci ci-d">🎨</div><div><div class="cn">Design</div><div class="cs">Illustration, Typography, UI, Motion, 3D & more</div></div><div class="ca">›</div></div><div class="subs exp">
+<div class="sc sd" onclick="go('create');pCT('design')"><div class="se">🖌️</div><div class="sn">Illustration</div><div class="su">PNG, SVG, PSD</div></div>
+<div class="sc sd" onclick="go('create');pCT('design')"><div class="se">🔤</div><div class="sn">Typography</div><div class="su">OTF, TTF, specimen</div></div>
+<div class="sc sd" onclick="go('create');pCT('design')"><div class="se">📱</div><div class="sn">UI / UX</div><div class="su">Figma, PNG, proto</div></div>
+<div class="sc sd" onclick="go('create');pCT('design')"><div class="se">🎞️</div><div class="sn">Motion</div><div class="su">MP4, GIF, AE</div></div>
+<div class="sc sd" onclick="go('create');pCT('design')"><div class="se">🧊</div><div class="sn">3D</div><div class="su">GLB, OBJ, 360°</div></div>
+<div class="sc sd" onclick="go('create');pCT('design')"><div class="se">🖼️</div><div class="sn">Fine Art</div><div class="su">Hi-res image</div></div>
+<div class="sc sd" onclick="go('create');pCT('design')"><div class="se">📐</div><div class="sn">Architecture</div><div class="su">Renders, plans</div></div>
+<div class="sc sd" onclick="go('create');pCT('design')"><div class="se">👗</div><div class="sn">Fashion</div><div class="su">Sketches, lookbook</div></div>
+</div></div>
+<div class="cb"><div class="ch" onclick="togC(this)"><div class="ci ci-s">🎵</div><div><div class="cn">Sound</div><div class="cs">Music, Composition, Mixing, Podcasts & more</div></div><div class="ca">›</div></div><div class="subs">
+<div class="sc ss" onclick="go('create');pCT('sound')"><div class="se">🎹</div><div class="sn">Composition</div><div class="su">WAV, FLAC, MIDI</div></div>
+<div class="sc ss" onclick="go('create');pCT('sound')"><div class="se">🎤</div><div class="sn">Vocal</div><div class="su">WAV stems</div></div>
+<div class="sc ss" onclick="go('create');pCT('sound')"><div class="se">🌊</div><div class="sn">Ambient</div><div class="su">Lossless, field rec</div></div>
+<div class="sc ss" onclick="go('create');pCT('sound')"><div class="se">🥁</div><div class="sn">Beats</div><div class="su">MP3, WAV, stems</div></div>
+<div class="sc ss" onclick="go('create');pCT('sound')"><div class="se">🔊</div><div class="sn">Sound Design</div><div class="su">SFX, Foley</div></div>
+<div class="sc ss" onclick="go('create');pCT('sound')"><div class="se">🎧</div><div class="sn">DJ / Mix</div><div class="su">Full mix, tracklist</div></div>
+<div class="sc ss" onclick="go('create');pCT('sound')"><div class="se">🎙️</div><div class="sn">Podcast</div><div class="su">MP3, transcript</div></div>
+<div class="sc ss" onclick="go('create');pCT('sound')"><div class="se">🎻</div><div class="sn">Classical</div><div class="su">Score, recording</div></div>
+</div></div>
+<div class="cb"><div class="ch" onclick="togC(this)"><div class="ci ci-l">📷</div><div><div class="cn">Lens</div><div class="cs">Photography, Film, Documentary, Drone & more</div></div><div class="ca">›</div></div><div class="subs">
+<div class="sc sl" onclick="go('create');pCT('lens')"><div class="se">📸</div><div class="sn">Portrait</div><div class="su">RAW, JPEG, TIFF</div></div>
+<div class="sc sl" onclick="go('create');pCT('lens')"><div class="se">🏙️</div><div class="sn">Street</div><div class="su">Series, essay</div></div>
+<div class="sc sl" onclick="go('create');pCT('lens')"><div class="se">🎬</div><div class="sn">Short Film</div><div class="su">MP4, MOV</div></div>
+<div class="sc sl" onclick="go('create');pCT('lens')"><div class="se">📹</div><div class="sn">Documentary</div><div class="su">Video, clips</div></div>
+<div class="sc sl" onclick="go('create');pCT('lens')"><div class="se">🌄</div><div class="sn">Landscape</div><div class="su">Hi-res, panoramic</div></div>
+<div class="sc sl" onclick="go('create');pCT('lens')"><div class="se">🛸</div><div class="sn">Drone</div><div class="su">4K, aerial stills</div></div>
+<div class="sc sl" onclick="go('create');pCT('lens')"><div class="se">🎥</div><div class="sn">Music Video</div><div class="su">MP4, MOV, BTS</div></div>
+<div class="sc sl" onclick="go('create');pCT('lens')"><div class="se">🔬</div><div class="sn">Macro</div><div class="su">Focus stack</div></div>
+</div></div>
+<div style="height:1rem"></div></div>
+
+<!-- CREATE -->
+<div class="scr" id="s-create"><div class="crt-top"><button class="crt-back" onclick="go('feed')">✕ Close</button><div class="crt-t">New Work</div><button class="crt-share" onclick="pub()">Share</button></div>
+<div class="crt-body">
+<div class="crt-label">Choose Your Craft</div>
+<div class="crt-crafts"><div class="co od sel" onclick="pC(this,'design')"><div class="co-i">🎨</div><div class="co-l">Design</div></div><div class="co os" onclick="pC(this,'sound')"><div class="co-i">🎵</div><div class="co-l">Sound</div></div><div class="co ol" onclick="pC(this,'lens')"><div class="co-i">📷</div><div class="co-l">Lens</div></div></div>
+<div class="crt-label">Subgenre</div>
+<div class="crt-chips" id="cch"><div class="cc sel" onclick="pCh(this)">Illustration</div><div class="cc" onclick="pCh(this)">Typography</div><div class="cc" onclick="pCh(this)">UI / UX</div><div class="cc" onclick="pCh(this)">Motion</div><div class="cc" onclick="pCh(this)">3D</div><div class="cc" onclick="pCh(this)">Fine Art</div><div class="cc" onclick="pCh(this)">Architecture</div><div class="cc" onclick="pCh(this)">Fashion</div></div>
+<div class="crt-label">Upload</div>
+<div class="crt-uz uzd" id="cuz" onclick="simUp()"><div class="uzi" id="uzI">🎨</div><div class="uzlb" id="uzL">Drop your design work</div><div class="uzf" id="uzF">PNG, SVG, PSD, AI, PDF · Up to 50MB<br>Process video or timelapse optional</div></div>
+<div class="crt-label">Description</div>
+<textarea class="crt-ta" placeholder="Tell the story behind this piece..."></textarea>
+<div class="crt-cz" onclick="opd('invite')"><div class="uzi" style="font-size:1.3rem;margin-bottom:0.2rem">✦</div><div class="uzlb" style="font-size:0.8rem">Invite collaborators</div><div class="uzf">Search artists to co-credit</div></div>
+<div style="height:5rem"></div>
+</div></div>
+
+<!-- COLLAB -->
+<div class="scr" id="s-collab"><div class="col-top"><h2>Collaboration</h2><div class="col-tabs"><div class="col-tab on" onclick="swCo(this,0)">Browse</div><div class="col-tab" onclick="swCo(this,1)">My Projects</div><div class="col-tab" onclick="swCo(this,2)">Invites</div></div></div>
+<div class="col-body">
+<div class="col-pan vis" id="cp0">
+<div class="pj"><div class="pj-top"><div class="pj-au"><div class="pj-av pv1"></div><div class="pj-an">Elena Rossi</div></div><div class="pj-st pso">Open</div></div><div class="pj-ti">Type Poster × Sound Series</div><div class="pj-de">Pairing typographic posters with ambient soundscapes.</div><div class="pj-tg"><span class="pj-tag gt-d">Design</span><span class="pj-tag gt-s">Sound</span></div><div class="pj-ft"><div class="pj-mb"><div class="ms"><div class="ma pv1"></div><div class="ma pv3"></div><div class="ma pv4"></div></div><div class="mc">3 of 6</div></div><button class="pj-ap" onclick="opAp('Type Poster × Sound Series')">Apply →</button></div></div>
+<div class="pj"><div class="pj-top"><div class="pj-au"><div class="pj-av pv2"></div><div class="pj-an">Amir Hassen</div></div><div class="pj-st psk">Seeking</div></div><div class="pj-ti">Ambient Score × Generative Visuals</div><div class="pj-de">Immersive audiovisual installation. Need a creative coder.</div><div class="pj-tg"><span class="pj-tag gt-s">Sound</span><span class="pj-tag gt-d">Motion</span></div><div class="pj-ft"><div class="pj-mb"><div class="ms"><div class="ma pv2"></div></div><div class="mc">1 of 3</div></div><button class="pj-ap" onclick="opAp('Ambient Score × Generative Visuals')">Apply →</button></div></div>
+<div class="pj"><div class="pj-top"><div class="pj-au"><div class="pj-av pv5"></div><div class="pj-an">Kai Fontaine</div></div><div class="pj-st psa">Active</div></div><div class="pj-ti">Short Film — "Bloom"</div><div class="pj-de">5-min experimental short. Seeking composer and photographer.</div><div class="pj-tg"><span class="pj-tag gt-l">Film</span><span class="pj-tag gt-s">Composition</span></div><div class="pj-ft"><div class="pj-mb"><div class="ms"><div class="ma pv5"></div><div class="ma pv4"></div></div><div class="mc">2 of 4</div></div><button class="pj-ap" onclick="opAp('Short Film — Bloom')">Apply →</button></div></div>
+<div class="pj"><div class="pj-top"><div class="pj-au"><div class="pj-av pv3"></div><div class="pj-an">Mira Okafor</div></div><div class="pj-st pso">Open</div></div><div class="pj-ti">Cultural Exchange Series</div><div class="pj-de">Artists from different cultures pair up. Any craft welcome.</div><div class="pj-tg"><span class="pj-tag gt-d">Design</span><span class="pj-tag gt-l">Lens</span><span class="pj-tag gt-s">Sound</span></div><div class="pj-ft"><div class="pj-mb"><div class="ms"><div class="ma pv3"></div><div class="ma pv1"></div><div class="ma pv2"></div><div class="ma pv5"></div></div><div class="mc">6 of 10</div></div><button class="pj-ap" onclick="opAp('Cultural Exchange Series')">Apply →</button></div></div>
+</div>
+<div class="col-pan" id="cp1"><div class="emp"><div class="emp-i">✦</div><div class="emp-t">No projects yet</div><div class="emp-d">Start your first creative project and invite artists to collaborate.</div><button class="emp-b" onclick="go('create')">Start a Project</button></div></div>
+<div class="col-pan" id="cp2">
+<div class="ni ni-unread"><div class="ni-av pv1"></div><div><div class="ni-t"><b>Luna Mercer</b> invited you to <b>"Duality in Bloom"</b></div><div class="ni-time">2m ago</div><div style="margin-top:0.5rem;display:flex;gap:0.4rem"><button class="inv-btn" onclick="this.textContent='Accepted ✓';this.classList.add('done')" style="font-size:0.58rem">Accept</button><button class="inv-btn" onclick="this.closest('.ni').style.opacity='0.3'" style="font-size:0.58rem">Decline</button></div></div></div>
+<div class="ni"><div class="ni-av pv5"></div><div><div class="ni-t"><b>Kai Fontaine</b> invited you to <b>"Bloom"</b></div><div class="ni-time">1d ago</div><div style="margin-top:0.5rem;display:flex;gap:0.4rem"><button class="inv-btn" onclick="this.textContent='Accepted ✓';this.classList.add('done')" style="font-size:0.58rem">Accept</button><button class="inv-btn" onclick="this.closest('.ni').style.opacity='0.3'" style="font-size:0.58rem">Decline</button></div></div></div>
+</div>
+<div style="height:1.5rem"></div></div></div>
+
+<!-- PROFILE -->
+<div class="scr" id="s-profile"><div class="pf-cv"></div><div class="pf-aw"><div class="pf-av">✦</div></div>
+<div class="pf-body">
+<div class="pf-name" id="pfN">You</div>
+<div class="pf-handle" id="pfH">@yourusername</div>
+<div class="pf-tags"><span class="gtag gt-d">Design</span><span class="gtag gt-l">Lens</span></div>
+<div class="pf-bio" id="pfB">Creating at the intersection of design and light. Always seeking the unexpected collaboration.</div>
+<div class="pf-stats"><div class="pf-si"><div class="pf-sn">24</div><div class="pf-sl">Works</div></div><div class="pf-si"><div class="pf-sn">7</div><div class="pf-sl">Collabs</div></div><div class="pf-si"><div class="pf-sn">1.2k</div><div class="pf-sl">Followers</div></div><div class="pf-si"><div class="pf-sn">340</div><div class="pf-sl">Following</div></div></div>
+<div class="pf-btns"><button class="pf-btn pf-ed" onclick="opd('edit')">Edit Profile</button><button class="pf-btn pf-sh" onclick="toast('Profile link copied!')">Share</button></div>
+<div class="pf-gtabs"><div class="pf-gt on" onclick="swPf(this,0)">Works</div><div class="pf-gt" onclick="swPf(this,1)">Collabs</div><div class="pf-gt" onclick="swPf(this,2)">About</div></div>
+<div class="pf-pan vis" id="pp0"><div class="pf-grid">
+<div class="gc" onclick="opDet('You','Design','Recent work')"><div class="gb g1"></div></div>
+<div class="gc" onclick="opDet('You','Design','Color study')"><div class="gb g2"></div></div>
+<div class="gc" onclick="opDet('You','Sound','Audio piece')"><div class="gb g3"></div><div class="gc-b">♪ Sound</div></div>
+<div class="gc" onclick="opDet('You','Lens','Photography')"><div class="gb g4"></div></div>
+<div class="gc"><div class="gb g5"></div></div>
+<div class="gc"><div class="gb g6"></div></div>
+<div class="gc"><div class="gb g1"></div></div>
+<div class="gc"><div class="gb g3"></div><div class="gc-b">♪ Sound</div></div>
+<div class="gc"><div class="gb g4"></div></div>
+</div></div>
+<div class="pf-pan" id="pp1">
+<div class="pj" style="background:var(--pearl)"><div class="pj-top"><div class="pj-au"><div class="pj-av pv1"></div><div class="pj-an">with Luna Mercer</div></div><div class="pj-st psa">Active</div></div><div class="pj-ti">Duality in Bloom</div><div class="pj-de">Mixed illustration exploring memory and imagination.</div></div>
+<div class="pj" style="background:var(--pearl)"><div class="pj-top"><div class="pj-au"><div class="pj-av pv2"></div><div class="pj-an">with Amir Hassen</div></div><div class="pj-st pso">Done</div></div><div class="pj-ti">Sound of Light</div><div class="pj-de">Ambient piece combining field recordings with long-exposure photography.</div></div>
+</div>
+<div class="pf-pan" id="pp2"><div class="pf-about">
+<div class="pf-as"><div class="pf-al">Location</div>Worldwide · Remote</div>
+<div class="pf-as"><div class="pf-al">Tools</div>Figma, Procreate, Ableton, Sony A7IV</div>
+<div class="pf-as"><div class="pf-al">Open to</div>Collaborations, Commissions, Events</div>
+<div class="pf-as"><div class="pf-al">Links</div><span style="color:var(--rose-accent);cursor:pointer">portfolio.site</span> · <span style="color:var(--rose-accent);cursor:pointer">instagram</span></div>
+</div></div>
+<div style="height:1.5rem"></div></div></div>
+</div>
+
+<!-- NAV -->
+<div class="bnav" id="bn" style="display:none">
+<div class="bnav-item on" onclick="go('feed')" data-s="feed"><div class="bnav-icon">🏠</div><div class="bnav-label">Home</div></div>
+<div class="bnav-item" onclick="go('crafts')" data-s="crafts"><div class="bnav-icon">◈</div><div class="bnav-label">Crafts</div></div>
+<div class="bnav-item create-nav" onclick="go('create')" data-s="create"><div class="bnav-icon">+</div></div>
+<div class="bnav-item" onclick="go('collab')" data-s="collab"><div class="bnav-icon">✦</div><div class="bnav-label">Collab</div></div>
+<div class="bnav-item" onclick="go('profile')" data-s="profile"><div class="bnav-icon">⊹</div><div class="bnav-label">You</div></div>
+</div>
+</div>
+
+<script>
+const AC=window.AudioContext||window.webkitAudioContext;let ac,sndOn=true;
+function init(){if(!ac)ac=new AC()}
+function tn(f,d,t='sine',v=0.06){if(!sndOn)return;init();const o=ac.createOscillator(),g=ac.createGain(),fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.value=1800;o.type=t;o.frequency.setValueAtTime(f,ac.currentTime);g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(v,ac.currentTime+0.015);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+d);o.connect(fl);fl.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}
+function ch(n,g=0.065){if(!sndOn)return;n.forEach((f,i)=>setTimeout(()=>tn(f,0.28,'sine',0.05),i*g*1000))}
+const sfx={nav:()=>ch([587,740,880],0.055),tap:()=>tn(932,0.08,'sine',0.035),like:()=>ch([740,880,1109],0.045),create:()=>ch([440,554,659,880],0.06),collab:()=>ch([554,659,880,1109,1319],0.055),craft:()=>tn(494,0.12,'triangle',0.04),enter:()=>ch([294,370,440,554,659],0.09),ambient:()=>{if(!sndOn)return;init();[247,311,370,494].forEach((f,i)=>setTimeout(()=>tn(f,1.8,'sine',0.025),i*180))},success:()=>ch([523,659,784,1047],0.07),save:()=>tn(659,0.15,'triangle',0.04)};
+document.getElementById('sndBtn').addEventListener('click',()=>{sndOn=!sndOn;document.getElementById('sndBtn').textContent=sndOn?'🔊':'🔇'});
+
+let cur='splash';
+function go(id){if(id===cur)return;const c=document.getElementById('s-'+cur),n=document.getElementById('s-'+id);if(!n)return;if(id==='feed'&&cur==='splash')sfx.enter();else if(id==='create')sfx.create();else if(id==='collab')sfx.collab();else sfx.nav();c.classList.remove('active');c.classList.add('out');setTimeout(()=>{c.classList.remove('out');n.classList.add('active');n.scrollTop=0},130);document.getElementById('bn').style.display=id==='splash'?'none':'flex';document.querySelectorAll('.bnav-item').forEach(i=>i.classList.toggle('on',i.dataset.s===id));cur=id}
+
+function opd(id){sfx.tap();cld();setTimeout(()=>{document.getElementById('ov').classList.add('vis');document.getElementById('d-'+id).classList.add('vis')},50)}
+function cld(){document.getElementById('ov').classList.remove('vis');document.querySelectorAll('.drawer').forEach(d=>d.classList.remove('vis'))}
+
+let tt;function toast(m){sfx.tap();const t=document.getElementById('tst');t.textContent=m;t.classList.add('vis');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('vis'),2000)}
+
+function doL(b){sfx.like();b.classList.toggle('liked');const i=b.querySelector('.pi'),lc=b.querySelector('.lc');if(b.classList.contains('liked')){i.textContent='♥';lc.textContent=+lc.textContent+1}else{i.textContent='♡';lc.textContent=+lc.textContent-1}i.style.transform='scale(1.4)';setTimeout(()=>i.style.transform='',280)}
+function doS(b){sfx.save();b.classList.toggle('saved');toast(b.classList.contains('saved')?'Saved to collection':'Removed from saves')}
+
+function filt(c){sfx.tap();document.querySelectorAll('.cpill').forEach(p=>{p.classList.remove('c-on');p.classList.add('c-off')});const a=document.querySelector(`.cpill[data-f="${c}"]`);if(a){a.classList.add('c-on');a.classList.remove('c-off')}document.querySelectorAll('.post').forEach(p=>{if(c==='all'||p.dataset.craft===c){p.classList.remove('hid');p.style.animation='none';p.offsetHeight;p.style.animation=''}else p.classList.add('hid')})}
+
+function togC(h){sfx.craft();h.classList.toggle('open');h.nextElementSibling.classList.toggle('exp')}
+
+const cfg={design:{cls:'uzd',icon:'🎨',lbl:'Drop your design work',fmt:'PNG, SVG, PSD, AI, PDF · Up to 50MB<br>Process video optional',chips:['Illustration','Typography','UI / UX','Motion','3D','Fine Art','Architecture','Fashion']},sound:{cls:'uzs',icon:'🎵',lbl:'Upload your sound',fmt:'WAV, FLAC, MP3, MIDI · Up to 100MB<br>Stems & scores welcome',chips:['Composition','Vocal','Ambient','Beats','Sound Design','DJ / Mix','Podcast','Classical']},lens:{cls:'uzl',icon:'📷',lbl:'Upload your visuals',fmt:'RAW, JPEG, TIFF, MP4, MOV · Up to 80MB<br>Photo series welcome',chips:['Portrait','Street','Short Film','Documentary','Landscape','Drone','Music Video','Macro']}};
+
+function pC(el,t){sfx.tap();document.querySelectorAll('.co').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');const c=cfg[t],uz=document.getElementById('cuz'),ch=document.getElementById('cch');uz.className='crt-uz '+c.cls;uz.classList.remove('has');document.getElementById('uzI').textContent=c.icon;document.getElementById('uzL').textContent=c.lbl;document.getElementById('uzF').innerHTML=c.fmt;ch.innerHTML=c.chips.map((x,i)=>`<div class="cc${i===0?' sel':''}" onclick="pCh(this)">${x}</div>`).join('')}
+function pCT(t){setTimeout(()=>{const opts=document.querySelectorAll('.co');const m={design:0,sound:1,lens:2};if(opts[m[t]])pC(opts[m[t]],t)},200)}
+function pCh(c){sfx.tap();document.querySelectorAll('.cc').forEach(x=>x.classList.remove('sel'));c.classList.add('sel')}
+function simUp(){sfx.tap();const uz=document.getElementById('cuz');uz.classList.add('has');document.getElementById('uzL').textContent='File selected ✓';document.getElementById('uzF').textContent='artwork_final.png · 12.4 MB';toast('File ready')}
+function pub(){sfx.success();toast('✦ Your work has been shared!');setTimeout(()=>go('feed'),1500)}
+
+function togInv(b){sfx.tap();if(b.classList.contains('done')){b.classList.remove('done');b.textContent='Invite'}else{b.classList.add('done');b.textContent='Invited ✓';toast('Invitation sent!')}}
+function filterInv(v){v=v.toLowerCase();document.querySelectorAll('.inv-u').forEach(u=>{u.style.display=u.dataset.n.includes(v)?'flex':'none'})}
+
+function postCmt(){const i=document.getElementById('cmtInput');if(i.value.trim()){sfx.tap();const c=document.createElement('div');c.className='cmt';c.innerHTML=`<div class="cmt-av" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--beige-warm),var(--sand))"></div><div class="cmt-b"><div class="cmt-n">You</div><div class="cmt-t">${i.value}</div><div class="cmt-m"><span>now</span><span>♡ 0</span></div></div>`;document.querySelector('.cmt-iw').before(c);i.value='';toast('Comment posted')}}
+
+function opAp(t){document.getElementById('apT').textContent='Apply: '+t;opd('apply')}
+function togTag(t){sfx.tap();t.classList.toggle('sel')}
+
+function swCo(el,i){sfx.tap();document.querySelectorAll('.col-tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');document.querySelectorAll('.col-pan').forEach(p=>p.classList.remove('vis'));document.getElementById('cp'+i).classList.add('vis')}
+
+function swPf(el,i){sfx.tap();document.querySelectorAll('.pf-gt').forEach(t=>t.classList.remove('on'));el.classList.add('on');document.querySelectorAll('.pf-pan').forEach(p=>p.classList.remove('vis'));document.getElementById('pp'+i).classList.add('vis')}
+
+function savProf(){document.getElementById('pfN').textContent=document.getElementById('edN').value;document.getElementById('pfH').textContent=document.getElementById('edH').value;document.getElementById('pfB').textContent=document.getElementById('edB').value;sfx.success();cld();toast('Profile updated!')}
+
+function opDet(a,c,d){document.getElementById('detB').innerHTML=`<div style="font-size:0.72rem;color:var(--text-light);margin-bottom:0.3rem">${c}</div><div style="font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:0.5rem">${a}</div><div style="font-size:0.78rem;line-height:1.6;color:var(--text);margin-bottom:1rem">${d}</div><div style="display:flex;gap:0.8rem"><button class="pa" onclick="doL(this)"><span class="pi">♡</span> <span class="lc">0</span></button><button class="pa" onclick="cld();opd('comments')"><span class="pi">💬</span> Comments</button><button class="pa" onclick="cld();opd('invite')"><span class="pi">✦</span> Collab</button></div>`;opd('detail')}
+
+function togPlay(b){if(b.classList.contains('playing')){b.classList.remove('playing');b.textContent='▶'}else{sfx.ambient();b.classList.add('playing');b.textContent='⏸';const bars=b.closest('.m-aud').querySelectorAll('.wb');let i=0;const iv=setInterval(()=>{if(i>=bars.length||!b.classList.contains('playing')){clearInterval(iv);return}bars.forEach(b=>b.classList.remove('on'));for(let j=Math.max(0,i-5);j<=i;j++)if(bars[j])bars[j].classList.add('on');i++},80);setTimeout(()=>{b.classList.remove('playing');b.textContent='▶'},4000)}}
+
+(function(){const w=document.getElementById('wf1');if(!w)return;for(let i=0;i<55;i++){const b=document.createElement('div');b.className='wb'+(i<22?' on':'');b.style.height=(6+Math.random()*36)+'px';w.appendChild(b)}})();
+document.addEventListener('click',()=>init(),{once:true});
+</script>
+</body>
+</html>
